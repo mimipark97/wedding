@@ -1,0 +1,121 @@
+
+<style>
+  .page { padding: 1.5rem 0; max-width: 680px; }
+  .header { text-align: center; margin-bottom: 1.5rem; }
+  .header h2 { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 4px; }
+  .header p { font-size: 13px; color: var(--color-text-secondary); margin: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    text-decoration: none;
+    color: var(--color-text-primary);
+    transition: border-color 0.15s, background 0.15s;
+    cursor: pointer;
+  }
+  .card:hover { border-color: var(--color-border-secondary); background: var(--color-background-secondary); }
+  .icon-wrap {
+    width: 36px; height: 36px; min-width: 36px;
+    border-radius: var(--border-radius-md);
+    background: #FBEAF0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .icon-wrap i { font-size: 18px; color: #D4537E; }
+  .card-text { overflow: hidden; }
+  .card-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-sub { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .copy-section { margin-top: 1.5rem; }
+  .copy-label { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 8px; }
+  .copy-box {
+    background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+    padding: 12px 14px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--color-text-secondary);
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.8;
+  }
+  .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+  .btn {
+    padding: 7px 14px; font-size: 13px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: transparent; color: var(--color-text-primary);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn:hover { background: var(--color-background-secondary); }
+  .copied { color: var(--color-text-success); }
+</style>
+
+<div class="page">
+  <h2 class="sr-only">27년 웨딩홀 견적 공유 링크 모음</h2>
+  <div class="header">
+    <h2>💍 27년 웨딩홀 견적 공유</h2>
+    <p>도레도레 블로그 · 직접 방문 후기</p>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="copy-section">
+    <div class="copy-label">쓰레드용 텍스트 복사</div>
+    <div class="copy-box" id="thread-text"></div>
+    <div class="btn-row">
+      <button class="btn" onclick="copyText()"><i class="ti ti-copy" aria-hidden="true"></i> 복사하기</button>
+      <span id="copy-msg" style="font-size:13px; align-self:center; display:none;" class="copied">✓ 복사됐어요!</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const venues = [
+  { name: "여의도 더파티움", area: "여의도", url: "https://blog.naver.com/mmmhyeokk/224252249708" },
+  { name: "강남 엘리에나호텔", area: "강남", url: "https://blog.naver.com/mmmhyeokk/224303081935" },
+  { name: "마포 웨딩시그니처", area: "마포", url: "https://blog.naver.com/mmmhyeokk/224250610442" },
+  { name: "빌라드지디 청담", area: "청담", url: "https://blog.naver.com/mmmhyeokk/224250414208" },
+  { name: "더링크호텔", area: "강남", url: "https://blog.naver.com/mmmhyeokk/224238553192" },
+  { name: "신도림 더세인트", area: "신도림", url: "https://blog.naver.com/mmmhyeokk/224234438054" },
+  { name: "구로 지타워컨벤션", area: "구로", url: "https://blog.naver.com/mmmhyeokk/224233205219" },
+  { name: "강남 셀럽앤어셈", area: "강남", url: "https://blog.naver.com/mmmhyeokk/224228661731" },
+  { name: "강남 루클라비더화이트", area: "강남", url: "https://blog.naver.com/mmmhyeokk/224226430771" },
+  { name: "광명무역센터컨벤션", area: "광명", url: "https://blog.naver.com/mmmhyeokk/224210452410" },
+  { name: "안양 더파티움", area: "안양", url: "https://blog.naver.com/mmmhyeokk/224201644714" },
+  { name: "안양 빌라드지디", area: "안양", url: "https://blog.naver.com/mmmhyeokk/224201593909" },
+  { name: "광명 아이벡스컨벤션", area: "광명", url: "https://blog.naver.com/mmmhyeokk/224201450750" },
+];
+
+const grid = document.getElementById("grid");
+venues.forEach(v => {
+  const a = document.createElement("a");
+  a.className = "card";
+  a.href = v.url;
+  a.target = "_blank";
+  a.innerHTML = `
+    <div class="icon-wrap"><i class="ti ti-building" aria-hidden="true"></i></div>
+    <div class="card-text">
+      <div class="card-name">${v.name}</div>
+      <div class="card-sub">27년 견적 공유 후기</div>
+    </div>`;
+  grid.appendChild(a);
+});
+
+const threadText = document.getElementById("thread-text");
+const lines = venues.map(v => `💍 ${v.name} 27년 견적 공유\n${v.url}`).join("\n\n");
+threadText.textContent = lines;
+
+function copyText() {
+  navigator.clipboard.writeText(lines).then(() => {
+    const msg = document.getElementById("copy-msg");
+    msg.style.display = "inline";
+    setTimeout(() => msg.style.display = "none", 2000);
+  });
+}
+</script>
