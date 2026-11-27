@@ -101,18 +101,23 @@ button{font-family:inherit;color:inherit;background:none;border:0;padding:0;curs
 .round-btn.muted .ic-off{display:block}
 
 /* ---------------------------------------------------------------- hero */
-.hero{position:relative;padding-bottom:34px}
+.hero{position:relative}
 .hero-photo{
-  position:relative;height:76svh;min-height:480px;max-height:660px;
+  position:relative;height:80svh;min-height:520px;max-height:700px;
+  overflow:hidden;
+  background:#1b1b1d;
+}
+.hero-photo::before{
+  content:"";position:absolute;inset:0;z-index:0;
   background-image:url('images/hero.jpg');
-  background-size:cover;background-position:center 18%;
+  background-size:cover;background-position:center 12%;
   filter:grayscale(1) contrast(1.06) brightness(1.02);
 }
 .hero-photo::after{
-  content:"";position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(20,18,18,.28) 0%,rgba(20,18,18,0) 26%,rgba(20,18,18,.06) 62%,rgba(20,18,18,.72) 100%);
+  content:"";position:absolute;inset:0;z-index:1;
+  background:linear-gradient(180deg,rgba(20,18,18,.26) 0%,rgba(20,18,18,0) 24%,rgba(20,18,18,.04) 60%,rgba(20,18,18,.5) 100%);
 }
-.letters{position:absolute;inset:0;bottom:34px;z-index:4;pointer-events:none}
+.letters{position:absolute;inset:0;z-index:2;pointer-events:none}
 .letters span{
   position:absolute;width:25px;height:25px;border-radius:50%;
   background:var(--pink);color:#fff;
@@ -122,29 +127,28 @@ button{font-family:inherit;color:inherit;background:none;border:0;padding:0;curs
   transform:translate(-50%,-50%) rotate(var(--r,0deg));
   opacity:.97;
 }
-.letters .dot{width:5px;height:5px;background:var(--pink);opacity:.85;box-shadow:none}
 
-/* torn paper heart badge */
+/* torn paper heart badge — sits on the photo/paper seam, clipped by the photo */
 .badge-wrap{
-  position:absolute;left:0;right:0;bottom:58px;z-index:6;
+  position:absolute;left:0;right:0;bottom:-8px;z-index:3;
   display:flex;justify-content:center;
-  transform:rotate(-2.4deg);
+  transform:rotate(-2.2deg);
 }
-.badge{position:relative;width:70%;max-width:300px;filter:drop-shadow(0 12px 18px rgba(0,0,0,.5))}
+.badge{position:relative;width:58%;max-width:234px}
 .badge svg{width:100%;display:block;overflow:visible}
 .badge-text{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:20% 9% 12%;text-align:center;color:#241a1c;
+  padding:16% 10% 18%;text-align:center;color:#241a1c;
 }
 .badge-names{
-  font-family:var(--serif);font-weight:400;font-size:17px;letter-spacing:.03em;
-  color:#2a161c;margin:0;
+  font-family:var(--serif);font-weight:400;font-size:13.4px;letter-spacing:.01em;
+  color:#2a161c;margin:0;line-height:1.28;
 }
 .badge-names b{font-weight:400}
-.badge-star{font-size:13px;margin:0 6px;color:#2a161c}
+.badge-star{font-size:10px;margin:0 4px;color:#2a161c}
 .badge-meta{
-  font-family:var(--serif);font-size:8.8px;letter-spacing:.08em;line-height:1.7;font-variant-numeric:lining-nums;
-  margin:7px 0 0;color:#3a2028;text-transform:uppercase;
+  font-family:var(--serif);font-size:7.8px;letter-spacing:.06em;line-height:1.6;font-variant-numeric:lining-nums;
+  margin:5px 0 0;color:#3a2028;text-transform:uppercase;
 }
 
 /* ---------------------------------------------------------------- intro */
@@ -491,23 +495,20 @@ button{font-family:inherit;color:inherit;background:none;border:0;padding:0;curs
 
   <!-- ================= HERO ================= -->
   <header class="hero" id="top">
-    <div class="hero-photo"></div>
+    <div class="hero-photo">
     <div class="letters" aria-hidden="true">
-        <span style="left:18%;top:26%;--r:-7deg">J</span>
-        <span style="left:24%;top:21%;--r:4deg">U</span>
-        <span style="left:30%;top:18%;--r:-3deg">N</span>
-        <span style="left:36%;top:18%;--r:6deg">H</span>
-        <span style="left:42%;top:21%;--r:-5deg">Y</span>
-        <span style="left:55%;top:18%;--r:3deg">E</span>
-        <span style="left:61%;top:17%;--r:-6deg">O</span>
-        <span style="left:67%;top:20%;--r:5deg">K</span>
-        <span style="left:73%;top:26%;--r:-5deg">M</span>
-        <span style="left:79%;top:33%;--r:7deg">I</span>
-        <span style="left:84%;top:41%;--r:-6deg">M</span>
-        <span style="left:88%;top:49%;--r:3deg">I</span>
-        <span class="dot" style="left:12%;top:47%"></span>
-        <span class="dot" style="left:48%;top:58%"></span>
-        <span class="dot" style="left:69%;top:58%"></span>
+        <span style="left:14.5%;top:31%;--r:-7deg">M</span>
+        <span style="left:20%;top:23%;--r:4deg">I</span>
+        <span style="left:26.5%;top:19%;--r:-3deg">M</span>
+        <span style="left:33%;top:21.5%;--r:6deg">I</span>
+        <span style="left:39.5%;top:27%;--r:-6deg">J</span>
+        <span style="left:45%;top:20.5%;--r:5deg">U</span>
+        <span style="left:50.5%;top:17%;--r:-4deg">N</span>
+        <span style="left:56.5%;top:16.5%;--r:6deg">H</span>
+        <span style="left:62.5%;top:18.5%;--r:-5deg">Y</span>
+        <span style="left:68.5%;top:22%;--r:3deg">E</span>
+        <span style="left:74.5%;top:26.5%;--r:-6deg">O</span>
+        <span style="left:80.5%;top:32%;--r:5deg">K</span>
     </div>
 
     <!-- torn paper heart badge -->
@@ -532,10 +533,11 @@ button{font-family:inherit;color:inherit;background:none;border:0;padding:0;curs
           </g>
         </svg>
         <div class="badge-text">
-          <p class="badge-names"><b>박준혁</b><span class="badge-star">✦</span><b>박미미</b></p>
+          <p class="badge-names"><b>Mimi Park</b><span class="badge-star">✦</span><b>Junhyeok Park</b></p>
           <p class="badge-meta">2027.01.30 SAT<br>3:40 PM<br>루이비스컨벤션 안양 8F</p>
         </div>
       </div>
+    </div>
     </div>
   </header>
 
@@ -591,22 +593,22 @@ button{font-family:inherit;color:inherit;background:none;border:0;padding:0;curs
         <circle cx="278" cy="16" r="5.4" fill="none" stroke="url(#silver)" stroke-width="2.8"/>
         <circle cx="256" cy="56" r="4.4" fill="none" stroke="url(#silver2)" stroke-width="2.2"/>
 
-        <!-- left locket : couple -->
+        <!-- left locket : bride -->
         <g transform="translate(18 62) scale(1.56) rotate(-5 50 52)">
           <path d="M50 90C50 90 6 64 6 36 6 19 18 6 33 6c9 0 14 6 17 12 3-6 8-12 17-12 15 0 27 13 27 30 0 28-44 54-44 54Z" fill="url(#silver)"/>
           <g clip-path="url(#holeA)">
-            <image href="images/locket-couple.jpg" x="-2" y="-4" width="104" height="104" preserveAspectRatio="xMidYMid slice" style="filter:grayscale(1) contrast(1.1) brightness(1.06)"/>
+            <image href="images/locket-bride.jpg" x="-2" y="-4" width="104" height="104" preserveAspectRatio="xMidYMid slice" style="filter:grayscale(1) contrast(1.06) brightness(1.03)"/>
           </g>
           <path d="M50 90C50 90 6 64 6 36 6 19 18 6 33 6c9 0 14 6 17 12 3-6 8-12 17-12 15 0 27 13 27 30 0 28-44 54-44 54Z" transform="translate(50 52) scale(.84) translate(-50 -52)" fill="none" stroke="rgba(58,58,64,.55)" stroke-width="1.6"/>
           <path d="M50 90C50 90 6 64 6 36 6 19 18 6 33 6c9 0 14 6 17 12 3-6 8-12 17-12 15 0 27 13 27 30 0 28-44 54-44 54ZM50 82C50 82 14 61 14 38c0-13 9-22 19-22 8 0 13 6 17 13 4-7 9-13 17-13 10 0 19 9 19 22 0 23-36 44-36 44Z" fill="url(#gloss)" fill-rule="evenodd"/>
           <path d="M50 90C50 90 6 64 6 36 6 19 18 6 33 6c9 0 14 6 17 12 3-6 8-12 17-12 15 0 27 13 27 30 0 28-44 54-44 54Z" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1"/>
         </g>
 
-        <!-- right locket : baby -->
+        <!-- right locket : groom -->
         <g transform="translate(146 52) scale(1.34) rotate(7 50 52)">
           <path d="M50 90C50 90 6 64 6 36 6 19 18 6 33 6c9 0 14 6 17 12 3-6 8-12 17-12 15 0 27 13 27 30 0 28-44 54-44 54Z" fill="url(#silver2)"/>
           <g clip-path="url(#holeB)">
-            <image href="images/locket-baby.webp" x="-2" y="-4" width="104" height="104" preserveAspectRatio="xMidYMid meet" style="filter:grayscale(.25) contrast(1.06) brightness(1.04)"/>
+            <image href="images/locket-groom.jpg" x="-2" y="-4" width="104" height="104" preserveAspectRatio="xMidYMid slice" style="filter:grayscale(1) contrast(1.06) brightness(1.03)"/>
           </g>
           <path d="M50 90C50 90 6 64 6 36 6 19 18 6 33 6c9 0 14 6 17 12 3-6 8-12 17-12 15 0 27 13 27 30 0 28-44 54-44 54Z" transform="translate(50 52) scale(.84) translate(-50 -52)" fill="none" stroke="rgba(58,58,64,.5)" stroke-width="1.5"/>
           <path d="M50 90C50 90 6 64 6 36 6 19 18 6 33 6c9 0 14 6 17 12 3-6 8-12 17-12 15 0 27 13 27 30 0 28-44 54-44 54ZM50 82C50 82 14 61 14 38c0-13 9-22 19-22 8 0 13 6 17 13 4-7 9-13 17-13 10 0 19 9 19 22 0 23-36 44-36 44Z" fill="url(#gloss)" fill-rule="evenodd"/>
@@ -615,7 +617,7 @@ button{font-family:inherit;color:inherit;background:none;border:0;padding:0;curs
       </svg>
     </div>
 
-    <p class="scene-cap">서로의 어린 날을, 이제 함께</p>
+    <p class="scene-cap">가장 빛나던 날의 두 사람</p>
 
     <!-- sky blue pentagon sticker -->
     <div class="penta" aria-label="예식 일시">
@@ -707,9 +709,10 @@ button{font-family:inherit;color:inherit;background:none;border:0;padding:0;curs
     </div>
 
     <div class="letter-paper reveal">
-      <p>어른이 되어 처음 만난 두 사람이<br>서로의 어린 날을 나중에 알게 되었습니다.</p>
-      <p>한 사람은 요리를 배우며 자랐고,<br>한 사람은 떠나는 법을 먼저 배웠습니다.</p>
-      <p>서로 다른 길로 자란 두 사람이<br>이제 같은 집에서 밥을 짓고,<br>같은 지도 위에 점을 찍으려 합니다.</p>
+      <p>스무 살과 스물넷, 가평에서 처음 만난 두 사람이<br>부산과 강원도에서 몇 번이고 다시 이어졌습니다.</p>
+      <p>알고 지낸 지 칠 년, 손을 잡고 걸은 시간 1,520일.<br>어른이 되어 만난 우리는 서로의 어린 날을<br>조금 늦게 알게 되었습니다.</p>
+      <p>닮은 곳보다 다른 곳이 많은 두 사람이지만,<br>그 다름이 서로의 빈자리를 채워 주었습니다.</p>
+      <p>이제 부부가 되어 여행하고, 맛있는 것 먹고,<br>친구처럼 웃으며 살아가려 합니다.</p>
     </div>
     <p class="sig">— 준혁 &amp; 미미</p>
   </section>

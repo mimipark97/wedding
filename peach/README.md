@@ -8,7 +8,7 @@
 | 경로 | 내용 |
 |---|---|
 | `index.html` | 완성본 (웹폰트 base64 내장 · 이 파일 하나로 열림) |
-| `images/` | 사진 22장(10번·18번 제외) + 히어로 1장 + 약도 + 아기 사진 스티커(webp) + 종이 텍스처 2장 |
+| `images/` | 사진 22장(10번·18번 제외, 전부 원본 해상도) + 히어로 1장 + 하트 로켓용 신부·신랑 클로즈업 2장 + 약도 + 아기 사진 스티커(webp) + 종이 텍스처 2장 |
 | `audio/bgm.mp3` | 배경음악 (기존 청첩장과 동일한 곡) |
 
 ## 손보는 곳
@@ -27,6 +27,14 @@
 
 - 사진을 `peach/images/parents.jpg` 로 올리고 `src="images/parents.jpg"` 로 바꾸면 끝입니다.
 - 아기 사진 스티커(`images/sticker-groom.webp`, `images/sticker-bride.webp`)은 그대로 두면 됩니다.
+
+### 사진 출처 (원본)
+모든 사진은 퍼스트레터 라이브 청첩장(`https://ourfirstletter.com/w/270130-6AKDkf`)의 **원본 고해상도 파일**을 그대로 받아 씁니다(보정본 아님).
+- `hero.jpg` = 원본 1749×2624 → 1600px 폭, JPEG q92
+- `gallery-*.jpg` = 원본 2000~3000px → 폭 1200px(가로 사진은 1800px), JPEG q92
+- 원본이 853px 폭인 사진 2장(`gallery-15`, `gallery-17`)은 원본 자체가 그 해상도입니다.
+- 다시 받으려면 `/workspace/work/peach-build/rebuild_photos.py` (원본은 `/workspace/work/peach-hires/orig/`),
+  하트 로켓 크롭은 `make_lockets.py`.
 
 ### 아기 사진 바꾸기
 `downloads/baby-demo/` 의 원본을 흰 배경 제거 + 외곽선 스티커로 만든 파일입니다.
