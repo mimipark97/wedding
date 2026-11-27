@@ -5,6 +5,25 @@
 - 열기: https://mimipark97.github.io/wedding/dore-reels-studio/
 - 소스: `index.html` 한 파일. 외부 의존은 폰트 CDN과, **얼굴 자동 추적을 켤 때만** 받는 AI 얼굴 감지 모델(MediaPipe tasks-vision + BlazeFace, 약 2MB)뿐.
 
+## 2026-11-27 22시 업그레이드 — 끊김 없는 MP4 저장 · 사파리 화면 고정
+
+### 1. 내보내기를 WebCodecs + mp4-muxer 프레임 단위 렌더로 교체
+- 예전: `canvas.captureStream()` + `MediaRecorder` 실시간 녹화 → 1080×1920 렌더·영상 디코딩 부하로 프레임이 드롭되어 뚝뚝 끊김.
+- 지금: `VideoEncoder` + `AudioEncoder` + `mp4-muxer`(jsdelivr 동적 import)로 **1/30초마다 `video.currentTime`을 정확히 시크 → `drawFrame(t)` → `VideoFrame` 인코딩**하는 오프라인 렌더.
+  - `avc1.420028`(Baseline 4.0) 우선, 미지원이면 `avc1.4d0028`/`avc1.640028` 순으로 협상. 30fps 고정, 2초마다 키프레임.
+  - 시크는 같은 시각이면 건너뛰고, 420ms 타임아웃 + 착지 확인 후 1회 재시도(최대 3회)로 멈추지 않습니다.
+  - 진행률은 `영상 만드는 중 · 38/120 프레임 · 32%`로 표시.
+- 실측(4초 · 영상+자막+PIP, 크로미움 390×844): **120프레임 / 4.00초 / 30fps**, 프레임 간격 전부 33ms, 앱이 그린 프레임과 평균 차이 1.7/255.
+  같은 프로젝트를 예전 방식으로 저장하면 96프레임에 최대 67ms 간격이 31곳 → 끊김이 재현됩니다.
+- 오디오: BGM·내장 효과음을 `OfflineAudioContext`로 한 번에 믹싱하고 AAC(`mp4a.40.2`)로 인코딩해 함께 muxing(사파리 16.4+).
+  AAC 인코더가 없는 브라우저는 소리를 잃지 않도록 기존 녹화 방식으로 폴백합니다.
+- WebCodecs/mp4-muxer/CDN을 못 쓰는 환경은 자동으로 예전 MediaRecorder 경로로 폴백.
+
+### 2. 사파리에서 편집이 편하도록 화면 고정
+- `html, body`를 `height:100dvh; overflow:hidden; overscroll-behavior:none` + `position:fixed`로 잠가 위아래로 끌어도 **바운스·당겨서 새로고침이 없습니다**(패널·타임라인은 안에서만 스크롤).
+- 일반 사파리로 열면 상단에 **`💡 공유 → 홈 화면에 추가`** 팁이 한 번 뜨고, ✕로 닫으면 다시 뜨지 않습니다(홈 화면 앱 모드에서는 안 뜸).
+- 캔버스·타임라인은 `-webkit-user-select:none / -webkit-touch-callout:none`으로 길게 눌러도 선택·콜아웃 메뉴가 뜨지 않고, 입력창(textarea/input)만 글자 선택이 됩니다.
+
 ## 2026-11-27 밤 업그레이드 (bake 앱 스타일)
 
 ### 1. 얼굴 자동 추적 → "한 번 스캔 + 키프레임 베이킹"
@@ -39,4 +58,4 @@
 ### 그대로 유지
 - 스티커·블러·모자이크·BGM·효과음·워터마크·프리셋·배속·전환 효과, 자동저장(IndexedDB), `💾 저장`/`📂 복원`(.json, 미디어 포함).
 
-정적 GitHub Pages라서 폰↔PC 실시간 클라우드 동기화는 지원하지 않습니다(별도 서버 필요). 기기 간 이동은 저장 → 복원 파일로 합니다.
+폰↔PC 동기화는 `☁️ 클라우드 연결`(Supabase)로 같은 이메일 로그인 시 자동 이어집니다. 클라우드 없이 옮기려면 `💾 저장` → `📂 복원`(.json)을 씁니다.
