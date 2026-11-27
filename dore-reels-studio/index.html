@@ -45,9 +45,42 @@ header.topbar{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:7px 
   background:linear-gradient(180deg,#FFFDF9,#FFF4EA);border-bottom:1px solid var(--line)}
 header .brand{display:flex;align-items:center;gap:5px;font-weight:800;font-size:13px;letter-spacing:-.3px;margin-right:auto;white-space:nowrap}
 header .brand em{font-style:normal;color:var(--pink2)}
-header .acts{display:flex;align-items:center;gap:4px}
+header .acts{display:flex;align-items:center;gap:4px;flex:0 0 auto}
+header .brand{min-width:0;overflow:hidden}
+header .brand span{overflow:hidden;text-overflow:ellipsis}
 header .acts button{padding:7px 8px;font-size:11.5px;border-radius:10px}
 header .acts button.primary{padding:8px 11px}
+
+/* ---------- 자동 저장 상태 ---------- */
+.savebar{flex:0 0 auto;display:flex;align-items:center;gap:5px;padding:2px 10px 1px}
+.save-mini{padding:3px 8px;font-size:10px;line-height:1.2;border-radius:8px;background:#FFF4EA;border:1px solid #F3E1D2;flex:0 0 auto}
+.save-state{display:inline-flex;align-items:center;gap:4px;font-weight:800;color:var(--lime2);
+  background:#F5FADF;border:1px solid #E2F0B4;border-radius:8px;padding:2px 7px;white-space:nowrap;letter-spacing:-.2px}
+.save-state b{font-variant-numeric:tabular-nums;font-weight:800;opacity:.85}
+.save-state .dot{width:6px;height:6px;border-radius:50%;background:#8FC22F;display:inline-block;flex:0 0 auto}
+.save-state.pending{color:#B4863A;background:#FFF7E4;border-color:#F2E3BE}
+.save-state.pending .dot{background:#E8B04B;animation:pulse 1s ease-in-out infinite}
+.save-state.error{color:#B4432F;background:#FFF0EC;border-color:#F6D5CB}
+.save-state.error .dot{background:#E0654A}
+.save-state.idle{color:var(--sub);background:#FAF3EC;border-color:var(--line)}
+.save-state.idle .dot{background:#C9B7AB}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+.savebar-hint{margin-left:auto;color:#BCAEA5;font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- 얼굴 자동 추적 · 키프레임 ---------- */
+.face-status{font-size:10px;line-height:1.35;border-radius:9px;padding:5px 8px;margin-top:5px;background:#FAF3EC;color:var(--sub);font-weight:600}
+.face-status.loading{background:#FFF7E4;color:#B4863A}
+.face-status.ready{background:var(--lime3);color:#4A5A1C;border:1px solid #DFEFB4}
+.face-status.error{background:#FFF0EC;color:#B4432F;border:1px solid #F6D5CB}
+button.wide{width:100%;padding:10px 8px;font-size:12px}
+.kf-list{margin-top:6px;max-height:112px;overflow-y:auto}
+.kf-row{display:flex;align-items:center;gap:5px;padding:4px 5px;border:1px solid var(--line);border-radius:9px;margin-bottom:4px;background:#FFFCF8;font-size:9.5px;color:var(--sub)}
+.kf-row.on{border-color:#C9B6F7;background:#F6F2FF}
+.kf-row b{color:#6C5BA8;font-variant-numeric:tabular-nums;flex:0 0 34px}
+.kf-row span{flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+.kf-row button{padding:3px 6px;font-size:9.5px;border-radius:7px;flex:0 0 auto}
+.tl-lane .kf{position:absolute;top:-4px;width:7px;height:7px;background:#A48CF0;border:1px solid #fff;transform:rotate(45deg);border-radius:1px;z-index:6;pointer-events:none;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.tl-block.blur.face{background:linear-gradient(180deg,#F3FAE0,#E3F3BD);border-color:#CBE49C;color:#45561E}
 
 /* ---------- stage ---------- */
 .stage-area{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:8px;
@@ -214,11 +247,16 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
     <div class="acts">
       <button id="btnUndo" class="icon" aria-label="실행취소" title="실행취소">↶</button>
       <button id="btnRedo" class="icon" aria-label="다시실행" title="다시실행">↷</button>
-      <button id="btnSave" title="프로젝트 .json 백업">💾 저장</button>
-      <button id="btnRestore" title="프로젝트 .json 복원">📂 복원</button>
       <button id="btnExport" class="primary" title="영상으로 저장">내보내기</button>
     </div>
   </header>
+
+  <div class="savebar">
+    <span id="saveState" class="save-state idle"><i class="dot"></i>자동저장 켜짐</span>
+    <button id="btnSave" class="save-mini" title="사진·영상까지 담은 프로젝트 백업(.json)">💾 저장</button>
+    <button id="btnRestore" class="save-mini" title="백업 .json 복원">📂 복원</button>
+    <span class="savebar-hint">다른 기기는 저장 → 복원으로 옮겨요</span>
+  </div>
 
   <div class="stage-area">
     <div class="stage" id="stage">
@@ -291,10 +329,11 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
       <li>타임라인에서 클립을 탭해 ✂️ 분할·배속·앞뒤 자르기·순서를 바꿔요.</li>
       <li><b>구간·자막</b>에서 자막을 추가하고, 미리보기에서 끌어 위치를 잡아요.</li>
       <li><b>디자인</b>에서 프리셋(필테 화이트·파스텔 핑크 라벨 등)을 한 번에 입혀요.</li>
-      <li>얼굴은 <b>스티커·블러</b>의 원형/사각 블러로 가려요.</li>
+      <li>얼굴은 <b>스티커·블러</b>의 원형/사각 블러로 가려요. 테두리의 <b>동그란 핸들</b>을 끌면 크기가 바로 바뀌어요.</li>
+      <li>블러를 고르고 <b>✨ 얼굴 자동 추적</b>을 켜면 AI가 얼굴을 찾아 블러가 따라가요. <b>📍 움직임 키프레임</b>으로 직접 따라가게 할 수도 있어요.</li>
       <li>다 됐으면 <b>내보내기</b> → 공유 → "비디오 저장"으로 사진첩에 저장해요.</li>
     </ol>
-    <p>작업은 이 브라우저에 자동 저장돼요. 다른 기기로 옮기려면 <b>💾 저장</b>으로 .json 백업을 받아 두세요.</p>
+    <p>작업은 이 브라우저에 자동 저장돼요(위쪽 <b>자동저장됨</b> 표시). 다른 기기로 옮기려면 <b>💾 저장</b>으로 .json 백업을 받아 두고, 그 기기에서 <b>📂 복원</b>으로 열어요.</p>
     <p>인터넷이 연결되어 있으면 한국어 폰트가 자동으로 불러와져요.</p>
     <button class="primary" data-close="1" style="width:100%;margin-top:8px">확인</button>
   </div>
@@ -566,9 +605,15 @@ const Draft = {
     try {
       const db = await this.open();
       const tx = db.transaction('kv', 'readwrite');
-      tx.objectStore('kv').put({ project: P, savedAt: Date.now() }, 'draft');
+      const at = Date.now();
+      tx.objectStore('kv').put({ project: P, savedAt: at }, 'draft');
       await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
-    } catch (e) { /* 저장 공간 부족 등은 조용히 무시 */ }
+      setSaveState('saved', at);
+      return true;
+    } catch (e) {
+      setSaveState('error');
+      return false;
+    }
   },
   async saveMedia(m) {
     if (!m.blob || this.savedMedia.has(m.id)) return;
@@ -611,8 +656,39 @@ const Draft = {
 };
 let draftTimer = 0;
 function queueDraftSave() {
+  setSaveState('pending');
   clearTimeout(draftTimer);
   draftTimer = setTimeout(() => { Draft.save(); }, 1200);
+}
+
+/* ---------------- 자동 저장 상태 표시 ---------------- */
+let saveState = { kind: 'idle', at: 0 };
+function hhmm(ms) {
+  try {
+    const d = new Date(ms);
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  } catch (e) { return ''; }
+}
+function setSaveState(kind, at) {
+  saveState = { kind, at: at || (kind === 'saved' ? Date.now() : saveState.at) };
+  const el = $('saveState');
+  if (!el) return;
+  if (kind === 'pending') {
+    el.className = 'save-state pending';
+    el.innerHTML = '<i class="dot"></i>저장 중…';
+  } else if (kind === 'saved') {
+    el.className = 'save-state saved';
+    el.innerHTML = '<i class="dot"></i>자동저장됨 <b>' + hhmm(saveState.at) + '</b>';
+  } else if (kind === 'error') {
+    el.className = 'save-state error';
+    el.innerHTML = '<i class="dot"></i>자동저장 안 됨 — 저장 공간을 확인해 주세요';
+  } else if (kind === 'off') {
+    el.className = 'save-state idle';
+    el.innerHTML = '<i class="dot"></i>자동저장 꺼짐 (시크릿 모드)';
+  } else {
+    el.className = 'save-state idle';
+    el.innerHTML = '<i class="dot"></i>자동저장 켜짐';
+  }
 }
 
 /* ---------------- media ---------------- */
@@ -733,6 +809,10 @@ function defaultBlur(shape, over) {
     id: uid('b'), shape: shape || 'circle', mode: 'blur',
     x: DESIGN_W / 2, y: 700, w, h: shape === 'circle' ? w : 300, rot: 0,
     strength: 16, opacity: 1,
+    track: 'manual',     // 'manual' | 'face'(AI 얼굴 자동 추적)
+    faceIndex: -1,       // -1 = 모든 얼굴
+    faceScale: 1.35,     // 얼굴 상자 대비 블러 크기
+    keys: [],            // [{t,x,y,w,h,rot}] 움직임 키프레임
     start: sp.start, end: sp.end
   }, over || {});
 }
@@ -954,10 +1034,67 @@ function drawStickerObject(ctx, o, t) {
 }
 
 /* -------- 블러 / 모자이크 -------- */
-function drawBlurObject(ctx, canvas, o) {
+/* 키프레임 보간: 가장 가까운 두 키 사이를 부드럽게(lerp) 잇습니다 */
+function smoothstep(p) {
+  p = clamp(p, 0, 1);
+  return p * p * (3 - 2 * p);
+}
+function keyBoxAt(o, t) {
+  const ks = o && o.keys;
+  if (!ks || !ks.length) return null;
+  if (t <= ks[0].t) return ks[0];
+  const last = ks[ks.length - 1];
+  if (t >= last.t) return last;
+  for (let i = 0; i < ks.length - 1; i++) {
+    const a = ks[i], b = ks[i + 1];
+    if (t >= a.t && t <= b.t) {
+      const span = Math.max(0.0001, b.t - a.t);
+      const p = smoothstep((t - a.t) / span);
+      return {
+        x: a.x + (b.x - a.x) * p,
+        y: a.y + (b.y - a.y) * p,
+        w: a.w + (b.w - a.w) * p,
+        h: a.h + (b.h - a.h) * p,
+        rot: (a.rot || 0) + ((b.rot || 0) - (a.rot || 0)) * p
+      };
+    }
+  }
+  return last;
+}
+/* 화면에 실제로 그려질 블러 위치·크기 (자동 추적 / 키프레임 / 수동) */
+function blurGeom(o, t) {
+  if (o.track === 'face') {
+    const bx = Face.boxes();
+    if (!bx.length) {
+      // 아직 얼굴을 못 찾았거나 모델 로딩 중 — 수동 박스를 그대로 보여 줍니다(그리기도 동일)
+      const kb = keyBoxAt(o, t);
+      const g = kb || o;
+      return { x: g.x, y: g.y, w: g.w, h: g.h, rot: g.rot || 0, face: true };
+    }
+    const idx = (o.faceIndex == null ? -1 : o.faceIndex);
+    const b = idx >= 0 ? bx[idx] : bx[0];
+    if (!b) return { x: o.x, y: o.y, w: o.w, h: o.h, rot: o.rot || 0, face: true };
+    const s = num(o.faceScale, 1.35);
+    return { x: b.x, y: b.y, w: clamp(b.w * s, 40, 1200), h: clamp(b.h * s, 40, 2000), rot: 0, face: true };
+  }
+  const kb = keyBoxAt(o, t);
+  if (kb) return { x: kb.x, y: kb.y, w: kb.w, h: kb.h, rot: kb.rot || 0 };
+  return { x: o.x, y: o.y, w: o.w, h: o.h, rot: o.rot || 0 };
+}
+function blurHandles(g) {
+  const r = (g.rot || 0) * Math.PI / 180, c = Math.cos(r), s = Math.sin(r);
+  const pts = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
+  return pts.map(p => {
+    const lx = p[0] * g.w / 2, ly = p[1] * g.h / 2;
+    return { x: g.x + lx * c - ly * s, y: g.y + lx * s + ly * c };
+  });
+}
+const HANDLE_R = 62, HANDLE_HIT = 96;
+function drawBlurObject(ctx, canvas, o, box) {
+  const g = box || o;
   const k = canvas.width / DESIGN_W;
-  const w = Math.max(8, o.w), h = Math.max(8, o.h);
-  const rad = (o.rot || 0) * Math.PI / 180;
+  const w = Math.max(8, g.w), h = Math.max(8, g.h);
+  const rad = (g.rot || 0) * Math.PI / 180;
   const bw = Math.abs(w * Math.cos(rad)) + Math.abs(h * Math.sin(rad));
   const bh = Math.abs(w * Math.sin(rad)) + Math.abs(h * Math.cos(rad));
   const isPixel = o.mode === 'pixel';
@@ -968,7 +1105,7 @@ function drawBlurObject(ctx, canvas, o) {
   const bx = BLUR_CANVAS.getContext('2d');
   bx.imageSmoothingEnabled = !isPixel;
   bx.clearRect(0, 0, tw, th);
-  const sx = (o.x - bw / 2) * k, sy = (o.y - bh / 2) * k;
+  const sx = (g.x - bw / 2) * k, sy = (g.y - bh / 2) * k;
   try {
     bx.drawImage(canvas, sx, sy, bw * k, bh * k, 0, 0, tw, th);
   } catch (e) { return; }
@@ -976,12 +1113,12 @@ function drawBlurObject(ctx, canvas, o) {
   ctx.globalAlpha = clamp(o.opacity == null ? 1 : o.opacity, 0, 1);
   if (o.shape === 'circle') {
     ctx.beginPath();
-    ctx.ellipse(o.x, o.y, w / 2, h / 2, rad, 0, Math.PI * 2);
+    ctx.ellipse(g.x, g.y, w / 2, h / 2, rad, 0, Math.PI * 2);
     ctx.clip();
     ctx.imageSmoothingEnabled = !isPixel;
-    ctx.drawImage(BLUR_CANVAS, 0, 0, tw, th, o.x - bw / 2, o.y - bh / 2, bw, bh);
+    ctx.drawImage(BLUR_CANVAS, 0, 0, tw, th, g.x - bw / 2, g.y - bh / 2, bw, bh);
   } else {
-    ctx.translate(o.x, o.y);
+    ctx.translate(g.x, g.y);
     ctx.rotate(rad);
     roundRectPath(ctx, -w / 2, -h / 2, w, h, 14);
     ctx.clip();
@@ -989,6 +1126,17 @@ function drawBlurObject(ctx, canvas, o) {
     ctx.drawImage(BLUR_CANVAS, 0, 0, tw, th, -bw / 2, -bh / 2, bw, bh);
   }
   ctx.restore();
+}
+/* 블러 하나를 시간 t에 맞춰 그리기 (얼굴 추적이면 얼굴 수만큼) */
+function drawBlurAt(ctx, canvas, o, t) {
+  if (o.track === 'face') {
+    const boxes = Face.boxesFor(o);
+    if (boxes) { for (const b of boxes) drawBlurObject(ctx, canvas, o, b); return; }
+    // 아직 얼굴을 한 번도 못 찾았거나 모델 준비 전 — 얼굴이 드러나지 않게 수동 박스로 덮어 둡니다
+    drawBlurObject(ctx, canvas, o, blurGeom({ x: o.x, y: o.y, w: o.w, h: o.h, rot: o.rot || 0, track: 'manual' }, t));
+    return;
+  }
+  drawBlurObject(ctx, canvas, o, blurGeom(o, t));
 }
 
 /* -------- 클립 미디어 -------- */
@@ -1025,21 +1173,81 @@ function drawSelection(ctx, t) {
   const type = state.sel ? state.sel.type : null;
   if (!o) return;
   if (!activeAt(o, t)) return;
-  const b = objBox(o, type);
-  const w = b.w * (type === 'text' ? textAnimState(o, t).scale : 1);
-  const h = b.h * (type === 'text' ? textAnimState(o, t).scale : 1);
+
+  let g = null;
+  if (type === 'blur') {
+    g = blurGeom(o, t);
+    if (!g) return;
+  } else {
+    const b = objBox(o, type);
+    const sc = type === 'text' ? textAnimState(o, t).scale : 1;
+    g = { x: o.x, y: o.y + (type === 'text' ? textAnimState(o, t).dy : 0), w: b.w * sc, h: b.h * sc, rot: o.rot || 0 };
+  }
+  const w = g.w, h = g.h;
   ctx.save();
-  ctx.translate(o.x, o.y);
-  ctx.rotate((o.rot || 0) * Math.PI / 180);
+  ctx.translate(g.x, g.y);
+  ctx.rotate((g.rot || 0) * Math.PI / 180);
   ctx.strokeStyle = 'rgba(255,143,177,.95)';
   ctx.lineWidth = 4;
   ctx.setLineDash([12, 8]);
   ctx.strokeRect(-w / 2 - 6, -h / 2 - 6, w + 12, h + 12);
   ctx.setLineDash([]);
   ctx.fillStyle = 'rgba(255,143,177,.95)';
-  const pts = [[-w / 2, -h / 2], [w / 2, -h / 2], [-w / 2, h / 2], [w / 2, h / 2]];
-  for (const p of pts) { ctx.beginPath(); ctx.arc(p[0], p[1], 9, 0, Math.PI * 2); ctx.fill(); }
+  if (type !== 'blur') {
+    const pts = [[-w / 2, -h / 2], [w / 2, -h / 2], [-w / 2, h / 2], [w / 2, h / 2]];
+    for (const p of pts) { ctx.beginPath(); ctx.arc(p[0], p[1], 9, 0, Math.PI * 2); ctx.fill(); }
+  }
   ctx.restore();
+
+  // 블러: 손가락으로 크기를 바로 바꿀 수 있는 핸들
+  if (type === 'blur') {
+    const hs = blurHandles(g);
+    for (const hp of hs) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(hp.x, hp.y, HANDLE_R, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,.96)';
+      ctx.fill();
+      ctx.lineWidth = 9;
+      ctx.strokeStyle = '#FF8FB1';
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(hp.x, hp.y, HANDLE_R * 0.36, 0, Math.PI * 2);
+      ctx.fillStyle = '#FF8FB1';
+      ctx.fill();
+      ctx.restore();
+    }
+    // 크기·얼굴 안내 라벨
+    const label = o.track === 'face'
+      ? ('✨ 얼굴 ' + Face.count() + '개 · ' + (Math.round(num(o.faceScale, 1.35) * 10) / 10) + 'x')
+      : ('가로 ' + Math.round(w) + ' · 세로 ' + Math.round(h));
+    ctx.save();
+    ctx.font = '700 46px ' + fontCss('pretendard') + ', sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    const tw = ctx.measureText(label).width;
+    const lx = clamp(g.x - w / 2, 8, DESIGN_W - tw - 36);
+    const ly = clamp(g.y - h / 2 - 58, 34, DESIGN_H - 20);
+    ctx.fillStyle = 'rgba(59,47,43,.82)';
+    roundRectPath(ctx, lx - 14, ly - 30, tw + 28, 60, 16);
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(label, lx, ly);
+    ctx.restore();
+    // 자동 추적 중이면 다른 얼굴들도 점선으로 표시
+    if (o.track === 'face') {
+      const all = Face.boxes();
+      for (let i = 1; i < all.length; i++) {
+        const b = all[i], s = num(o.faceScale, 1.35);
+        ctx.save();
+        ctx.strokeStyle = 'rgba(205,235,107,.9)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([10, 8]);
+        ctx.strokeRect(b.x - b.w * s / 2, b.y - b.h * s / 2, b.w * s, b.h * s);
+        ctx.restore();
+      }
+    }
+  }
 
   if (guides.v) {
     ctx.save();
@@ -1084,7 +1292,10 @@ function drawFrame(canvas, t, opts) {
     ctx.fillRect(0, 0, DESIGN_W, DESIGN_H);
   }
 
-  for (const b of P.blurs) if (activeAt(b, t)) drawBlurObject(ctx, canvas, b);
+  // AI 얼굴 감지: 블러를 그리기 전 프레임을 축소 캔버스로 복사해 얼굴을 찾습니다
+  if (Face.want()) Face.frame(canvas);
+
+  for (const b of P.blurs) if (activeAt(b, t)) drawBlurAt(ctx, canvas, b, t);
   for (const s of P.stickers) if (activeAt(s, t)) drawStickerObject(ctx, s, t);
   for (const tx of P.texts) if (activeAt(tx, t)) drawTextObject(ctx, tx, t);
 
@@ -1102,8 +1313,212 @@ function renderOnce() {
   const cv = $('preview');
   if (!cv) return;
   if (!state.playing) syncMedia(state.t, false);
+  Face.autoLoad();
   fitCanvas(cv);
   drawFrame(cv, state.t, {});
+}
+
+/* ============================================================
+   AI 얼굴 감지 — MediaPipe FaceDetector (CDN 지연 로딩)
+   · 앱을 처음 열 때는 아무것도 받지 않고, '얼굴 자동 추적'을 켤 때만 불러옵니다.
+   · 아이폰 사파리 호환: tasks-vision WASM(모듈러) + BlazeFace 단거리 모델
+   ============================================================ */
+const FACE_CDN = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+const FACE_WASM = FACE_CDN + '/wasm';
+const FACE_MODEL = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
+
+const Face = {
+  status: 'idle',        // idle | loading | ready | error
+  err: '',
+  detector: null,
+  promise: null,
+  detW: 416, detH: 740,  // 감지용 축소 프레임 (작을수록 빠름)
+  canvas: null,
+  ctx: null,
+  interval: 120,         // 감지 주기(ms) — 8fps
+  lastRun: 0,
+  target: [],            // 마지막 감지 결과 (디자인 좌표)
+  cur: [],               // 화면에 쓰는 부드러운 좌표
+  lastAt: 0,
+  runs: 0,
+  hits: 0,
+
+  want() {
+    for (const b of P.blurs) if (b.track === 'face') return true;
+    return false;
+  },
+  wantAny() {
+    return this.want();
+  },
+  ensure() {
+    if (this.status === 'ready') { updateFaceStatus(); return Promise.resolve(true); }
+    if (!this.promise) this.promise = this._load();
+    return this.promise;
+  },
+  /* 불러온 프로젝트에 얼굴 추적 블러가 있으면 자동으로 모델을 준비합니다 */
+  autoLoad() {
+    if (this.status !== 'idle') return;
+    if (!this.want()) return;
+    this.ensure();
+  },
+  async _load() {
+    this.status = 'loading';
+    this.err = '';
+    updateFaceStatus();
+    try {
+      const mod = await import(/* webpackIgnore: true */ FACE_CDN + '/vision_bundle.mjs');
+      if (!mod || !mod.FilesetResolver || !mod.FaceDetector) throw new Error('AI 모듈을 읽지 못했어요');
+      const fileset = await mod.FilesetResolver.forVisionTasks(FACE_WASM);
+      let det = null, lastErr = null;
+      for (const delegate of ['GPU', 'CPU']) {
+        try {
+          det = await mod.FaceDetector.createFromOptions(fileset, {
+            baseOptions: { modelAssetPath: FACE_MODEL, delegate },
+            runningMode: 'VIDEO',
+            minDetectionConfidence: 0.5,
+            minSuppressionThreshold: 0.3
+          });
+          if (det) break;
+        } catch (e) { lastErr = e; }
+      }
+      if (!det) throw (lastErr || new Error('얼굴 모델을 초기화하지 못했어요'));
+      this.detector = det;
+      this.status = 'ready';
+      this.lastRun = 0;
+      updateFaceStatus();
+      if (!state.playing) renderOnce();
+      return true;
+    } catch (e) {
+      this.status = 'error';
+      this.err = (e && e.message) ? e.message : String(e);
+      this.promise = null;
+      updateFaceStatus();
+      toast('AI 얼굴 감지를 불러오지 못했어요. 인터넷 연결을 확인하고 다시 켜 주세요.', 3800);
+      return false;
+    }
+  },
+  reset() {
+    this.target = [];
+    this.cur = [];
+    this.lastAt = 0;
+    this.lastRun = 0;
+  },
+  /* 합성된 프레임(블러를 그리기 전)을 축소 캔버스로 복사 */
+  capture(src) {
+    if (this.status !== 'ready' || !src) return;
+    if (!this.canvas) {
+      this.canvas = document.createElement('canvas');
+      this.canvas.width = this.detW;
+      this.canvas.height = this.detH;
+      this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
+    }
+    const c = this.ctx;
+    if (!c) return;
+    try {
+      c.drawImage(src, 0, 0, src.width, src.height, 0, 0, this.detW, this.detH);
+      this.frameAt = performance.now();
+    } catch (e) { }
+  },
+  /* 프레임마다 불리는 진입점 — 감지 주기일 때만 프레임 복사+감지 (아이폰 발열·속도) */
+  frame(src) {
+    if (this.status !== 'ready') return;
+    if (!this.want()) return;
+    const now = performance.now();
+    if (now - this.lastRun >= this.interval) {
+      this.capture(src);
+      this.tick(now);
+    }
+    this.stepSmooth();
+  },
+  /* 감지 실행 (스로틀) */
+  tick(now) {
+    if (this.status !== 'ready' || !this.detector) return;
+    if (!this.want()) return;
+    if (!this.canvas || this.frameAt == null) return;
+    const t = (now == null ? performance.now() : now);
+    if (t - this.lastRun < this.interval) return;
+    this.lastRun = t;
+    let res = null;
+    try {
+      res = this.detector.detectForVideo(this.canvas, t);
+    } catch (e) {
+      this.err = (e && e.message) ? e.message : String(e);
+      this.lastRun = t + 1200; // 연속 실패 시 잠시 쉼
+      return;
+    }
+    const dets = (res && res.detections) || [];
+    const sx = DESIGN_W / this.detW, sy = DESIGN_H / this.detH;
+    const boxes = [];
+    for (const d of dets) {
+      const b = d.boundingBox || {};
+      const w = num(b.width, 0) * sx, h = num(b.height, 0) * sy;
+      if (w < 8 || h < 8) continue;
+      boxes.push({ x: (num(b.originX, 0) + num(b.width, 0) / 2) * sx, y: (num(b.originY, 0) + num(b.height, 0) / 2) * sy, w, h });
+    }
+    boxes.sort((a, b) => a.x - b.x);
+    this.runs++;
+    if (boxes.length) {
+      this.target = boxes;
+      this.lastAt = t;
+      this.hits++;
+    } else if (t - this.lastAt > 4000) {
+      this.target = [];
+      this.cur = [];
+    }
+    updateFaceStatus();
+  },
+  /* 감지 → 그리기 사이를 매 프레임 부드럽게 이어 줌 */
+  stepSmooth() {
+    const T = this.target;
+    if (!T.length) return;
+    const C = this.cur;
+    if (C.length !== T.length) { this.cur = T.map(b => ({ x: b.x, y: b.y, w: b.w, h: b.h })); return; }
+    for (let i = 0; i < T.length; i++) {
+      const c = C[i], t = T[i];
+      const jump = Math.abs(t.x - c.x) + Math.abs(t.y - c.y);
+      const a = jump > 260 ? 1 : 0.34;
+      c.x += (t.x - c.x) * a;
+      c.y += (t.y - c.y) * a;
+      c.w += (t.w - c.w) * a;
+      c.h += (t.h - c.h) * a;
+    }
+  },
+  boxes() {
+    return this.cur.length ? this.cur : this.target;
+  },
+  /* 이 블러 오브젝트가 따라갈 얼굴 상자들 */
+  boxesFor(o) {
+    const arr = this.boxes();
+    if (!arr.length) return null;    const idx = (o.faceIndex == null ? -1 : o.faceIndex);
+    const list = idx >= 0 ? (arr[idx] ? [arr[idx]] : []) : arr;
+    if (!list.length) return null;
+    const s = num(o.faceScale, 1.35);
+    return list.map(b => ({
+      x: b.x, y: b.y, rot: 0,
+      w: clamp(b.w * s, 40, DESIGN_W * 1.2),
+      h: clamp(b.h * s, 40, DESIGN_H * 1.2)
+    }));
+  },
+  count() { return this.boxes().length; }
+};
+
+function faceStatusText() {
+  if (Face.status === 'loading') return '⏳ AI 모델 불러오는 중…';
+  if (Face.status === 'error') return '⚠️ 불러오기 실패 — 인터넷 연결을 확인해 주세요';
+  if (Face.status === 'ready') {
+    const n = Face.count();
+    return n ? ('✅ 얼굴 ' + n + '개 감지 중') : '🔍 얼굴을 찾는 중… (화면에 얼굴이 보이게 해 주세요)';
+  }
+  return 'AI 얼굴 감지 꺼짐';
+}
+function updateFaceStatus() {
+  const els = document.querySelectorAll('[data-face-status]');
+  if (!els || !els.length) return;
+  const msg = faceStatusText();
+  for (let i = 0; i < els.length; i++) {
+    els[i].textContent = msg;
+    els[i].className = 'face-status ' + Face.status;
+  }
 }
 
 /* ============================================================
@@ -1514,7 +1929,11 @@ function renderTimeline() {
   }
   for (const o of P.blurs) {
     const s = clamp(o.start || 0, 0, dur), e = clamp(o.end == null ? dur : o.end, s + 0.05, Math.max(dur, s + 0.05));
-    hObjs += '<div class="tl-block blur' + (sel.type === 'blur' && sel.id === o.id ? ' sel' : '') + '" data-type="blur" data-id="' + o.id + '" style="left:' + (s * pps) + 'px;width:' + Math.max(10, (e - s) * pps) + 'px">' + (o.shape === 'circle' ? '⭕' : '⬜') + ' 블러</div>';
+    const tag = o.track === 'face' ? '✨얼굴' : (o.shape === 'circle' ? '⭕' : '⬜');
+    hObjs += '<div class="tl-block blur' + (sel.type === 'blur' && sel.id === o.id ? ' sel' : '') + (o.track === 'face' ? ' face' : '') + '" data-type="blur" data-id="' + o.id + '" style="left:' + (s * pps) + 'px;width:' + Math.max(10, (e - s) * pps) + 'px">' + tag + ' 블러</div>';
+    if (o.keys && o.keys.length) {
+      for (const k of o.keys) hObjs += '<i class="kf" style="left:' + clamp(k.t * pps, 0, Math.max(0, w - 6)) + 'px"></i>';
+    }
   }
   let hAudio = '';
   for (const b of P.bgm) {
@@ -1680,16 +2099,24 @@ function panelSub() {
 }
 
 function panelStick() {
-  let h = '<div class="panel-card"><h4>🧸 스티커</h4><div class="sticker-grid">' +
+  const stickerCard = '<div class="panel-card"><h4>🧸 스티커</h4><div class="sticker-grid">' +
     STICKERS.map(s => '<button data-act="addSticker" data-sticker="' + s.id + '" title="' + s.label + '"><img src="' + stickerDataUrl(s.id) + '" alt="' + s.label + '"></button>').join('') +
     '</div><div class="row" style="margin-top:7px"><button class="ghost" data-act="pickSticker">+ 내 사진 스티커</button></div></div>';
-  h += '<div class="panel-card"><h4>🙈 얼굴 블러 · 모자이크</h4>' +
+  const blurAddCard = '<div class="panel-card"><h4>🙈 얼굴 블러 · 모자이크</h4>' +
     '<div class="row tight"><button class="lime" data-act="addBlur" data-shape="circle">⭕ 원형 블러</button>' +
     '<button class="ghost" data-act="addBlur" data-shape="rect">⬜ 사각 블러</button></div>' +
-    '<p class="muted">거울 속 얼굴 가릴 때 필수! 미리보기에서 끌어 위치를 옮기고 두 손가락으로 크기를 맞춰요.</p></div>';
+    '<p class="muted">거울 속 얼굴 가릴 때 필수! 미리보기에서 끌어 위치를 옮기고, 모서리 동그라미 핸들을 끌면 크기가 바로 바뀌어요.</p></div>';
 
   const o = selObj();
-  if (!o) { h += '<div class="panel-card"><div class="hintbox">스티커나 블러를 탭하면 크기·투명도·노출 시간을 조절할 수 있어요.</div></div>'; return h; }
+  let h = '';
+  const isBlur = o && state.sel && state.sel.type === 'blur';
+  // 블러를 선택했을 때는 블러 조절판을 맨 위에 바로 보여 줍니다
+  if (isBlur) h += blurCards(o);
+  h += stickerCard + blurAddCard;
+  if (!o) {
+    h += '<div class="panel-card"><div class="hintbox">스티커나 블러를 탭하면 크기·투명도·노출 시간을 조절할 수 있어요. 블러를 탭하면 <b>✨ 얼굴 자동 추적</b>도 켤 수 있어요.</div></div>';
+    return h;
+  }
   const d = Math.max(0.5, totalDur());
   if (state.sel.type === 'sticker') {
     h += '<div class="panel-card"><h4>선택한 스티커</h4>' +
@@ -1701,22 +2128,77 @@ function panelStick() {
       '<div class="row tight" style="margin-top:4px"><button class="ghost" data-act="objStartHere">시작=현재</button>' +
       '<button class="ghost" data-act="objEndDur">끝까지</button>' +
       '<button class="ghost" data-act="objDelete">삭제</button></div></div>';
-  } else if (state.sel.type === 'blur') {
-    h += '<div class="panel-card"><h4>선택한 블러</h4>' +
-      segRow('모양', 'shape', [['circle', '⭕ 원형'], ['rect', '⬜ 사각']], o.shape) +
-      segRow('방식', 'mode', [['blur', '부드럽게'], ['pixel', '픽셀(모자이크)']], o.mode) +
-      rangeRow('강도', 'strength', 3, 40, 1, o.strength, '') +
+  }
+  return h;
+}
+
+/* 블러 조절판 (크기·강도·얼굴 추적·키프레임·노출) */
+function blurCards(o) {
+  const d = Math.max(0.5, totalDur());
+  const faceOn = o.track === 'face';
+  const keys = o.keys || [];
+  const master = Math.max(o.w, o.h);
+  let h = '<div class="panel-card"><h4>선택한 블러 <small class="muted">' + (o.shape === 'circle' ? '원형' : '사각') + ' · ' + (o.mode === 'pixel' ? '모자이크' : '블러') + '</small></h4>' +
+    segRow('모양', 'shape', [['circle', '⭕ 원형'], ['rect', '⬜ 사각']], o.shape) +
+    segRow('방식', 'mode', [['blur', '부드럽게'], ['pixel', '픽셀(모자이크)']], o.mode);
+  if (faceOn) {
+    h += rangeRow('얼굴 대비 크기', 'faceScale', 0.8, 3, 0.05, num(o.faceScale, 1.35), 'x');
+  } else {
+    h += rangeRow('블러 크기', '__blurSize', 40, 1080, 10, master, '') +
       rangeRow('가로', 'w', 40, 1080, 10, o.w, '') +
-      rangeRow('세로', 'h', 40, 1920, 10, o.h, '') +
-      rangeRow('회전', 'rot', -180, 180, 1, o.rot || 0, '°') +
-      rangeRow('불투명도', 'opacity', 0, 1, 0.05, o.opacity, '') +
+      rangeRow('세로', 'h', 40, 1920, 10, o.h, '');
+  }
+  h += rangeRow('강도', 'strength', 3, 40, 1, o.strength, '') +
+      rangeRow('불투명도', 'opacity', 0, 1, 0.05, o.opacity, '');
+    if (!faceOn) h += rangeRow('회전', 'rot', -180, 180, 1, o.rot || 0, '°');
+    h += '<p class="muted" style="margin-top:2px">미리보기 블러 테두리의 <b>동그란 핸들</b>을 끌면 바로 커지고 줄어요. (두 손가락 집기도 OK)</p></div>';
+
+    // 얼굴 자동 추적
+    h += '<div class="panel-card"><h4>✨ AI 얼굴 자동 추적</h4>' +
+      '<button class="' + (faceOn ? 'lime wide' : 'ghost wide') + '" data-act="toggleFaceTrack">' +
+      (faceOn ? '✨ 얼굴 자동 추적 켜짐 — 끄기' : '✨ 얼굴 자동 추적 켜기') + '</button>' +
+      '<div class="face-status ' + Face.status + '" data-face-status>' + esc(faceStatusText()) + '</div>';
+    if (faceOn) {
+      const cnt = Math.max(1, Face.count());
+      const opts = [['-1', '모든 얼굴']];
+      for (let i = 0; i < Math.min(4, cnt); i++) opts.push([String(i), '얼굴' + (i + 1)]);
+      h += segRow('가릴 얼굴', 'faceIndex', opts, String(o.faceIndex == null ? -1 : o.faceIndex)) +
+        '<p class="muted">얼굴을 자동으로 찾아 그 위에만 블러가 따라붙어요. 재생·내보내기할 때도 똑같이 동작해요.</p>';
+      if (Face.status === 'error') h += '<div class="row tight" style="margin-top:4px"><button class="ghost" data-act="retryFace">🔄 다시 불러오기</button></div>';
+    } else {
+      h += '<p class="muted">켜면 화면 속 사람 얼굴(여러 명 포함)을 AI가 찾아 블러가 따라다녀요. 처음 한 번만 모델을 받아서 조금 걸려요.</p>';
+    }
+    h += '</div>';
+
+    // 움직임 키프레임
+    if (!faceOn) {
+      h += '<div class="panel-card"><h4>📍 움직임 키프레임 <small class="muted">' + (keys.length ? keys.length + '개' : '없음') + '</small></h4>' +
+        '<div class="row tight">' +
+        '<button class="primary" data-act="addKey">📍 현재 위치에 키프레임</button>' +
+        (keys.length ? '<button class="ghost" data-act="clearKeys">모두 지우기</button>' : '') +
+        '</div>';
+      if (keys.length) {
+        h += '<div class="kf-list">';
+        keys.forEach((k, i) => {
+          const here = Math.abs(k.t - state.t) < 0.15;
+          h += '<div class="kf-row' + (here ? ' on' : '') + '"><b>' + fmtS(k.t) + '</b><span>' + Math.round(k.x) + ',' + Math.round(k.y) + ' · ' + Math.round(k.w) + '×' + Math.round(k.h) + '</span>' +
+            '<button data-act="goKey" data-i="' + i + '">이동</button>' +
+            '<button data-act="delKey" data-i="' + i + '">✕</button></div>';
+        });
+        h += '</div>';
+        h += '<p class="muted">키프레임 두 개 사이는 부드럽게 이어져요. 움직이는 얼굴을 따라가게 하려면 시간을 옮기며 블러를 옮겨 키프레임을 찍어 주세요.</p>';
+      } else {
+        h += '<p class="muted">첫 키프레임을 찍고, 재생바를 옮긴 뒤 블러를 새 위치로 끌면 자동으로 다음 키프레임이 찍혀요.</p>';
+      }
+      h += '</div>';
+    }
+
+    h += '<div class="panel-card"><h4>노출 시간</h4>' +
       rangeRow('시작', 'start', 0, d, 0.1, clamp(o.start, 0, d), 's') +
       rangeRow('끝', 'end', 0, d, 0.1, clamp(o.end == null ? d : o.end, 0, d), 's') +
       '<div class="row tight" style="margin-top:4px"><button class="ghost" data-act="objStartHere">시작=현재</button>' +
       '<button class="ghost" data-act="objEndDur">끝까지</button>' +
-      '<button class="ghost" data-act="objDelete">삭제</button></div>' +
-      '<p class="muted">세로가 긴 얼굴엔 원형 + 세로를 늘려 보세요. 여러 명 얼굴엔 블러를 여러 개 붙이면 돼요.</p></div>';
-  }
+      '<button class="ghost" data-act="objDelete">삭제</button></div></div>';
   return h;
 }
 
@@ -1889,10 +2371,32 @@ function handleProp(el, prop, value) {
   const isNum = el.type === 'range' || el.type === 'number';
   const isBool = el.type === 'checkbox';
   let v = isBool ? !!value : isNum ? num(value, 0) : value;
+
+  // 블러 크기 한 번에 (가로·세로 비율 유지)
+  if (prop === '__blurSize') {
+    const cur = Math.max(o.w, o.h) || 1;
+    const f = clamp(v / cur, 0.1, 12);
+    o.w = Math.round(clamp(o.w * f, 40, 1080));
+    o.h = Math.round(clamp(o.h * f, 40, 1800));
+    if (o.start === undefined) o.start = 0;
+    if (o.keys && o.keys.length) setKeyAt(o, state.t);
+    liveUpdate();
+    return;
+  }
+  if (prop === 'faceIndex') {
+    o.faceIndex = parseInt(value, 10) || 0;
+    if (String(value) === '-1') o.faceIndex = -1;
+    liveUpdate();
+    return;
+  }
+
   if (prop === 'start') { o.start = clamp(v, 0, Math.max(0, (o.end == null ? totalDur() : o.end) - 0.2)); }
   else if (prop === 'end') { o.end = clamp(v, (o.start || 0) + 0.2, Math.max(totalDur(), (o.start || 0) + 0.2)); }
   else if (prop === 'text') { o.text = value; layoutCache.delete(o.id); }
   else setPath(o, prop, v);
+
+  // 키프레임이 있으면 지금 위치·크기를 키에 반영
+  if ((prop === 'w' || prop === 'h' || prop === 'x' || prop === 'y' || prop === 'rot') && o.keys && o.keys.length) setKeyAt(o, state.t);
 
   if (prop === 'size') ensureFont(o.font);
   liveUpdate();
@@ -1958,6 +2462,22 @@ function panelAction(act, btn) {
     case 'addSticker': addSticker(btn.dataset.sticker); break;
     case 'pickSticker': $('fileSticker').click(); break;
     case 'addBlur': addBlur(btn.dataset.shape); break;
+    case 'toggleFaceTrack': toggleFaceTrack(); break;
+    case 'retryFace':
+      Face.promise = null;
+      Face.status = 'idle';
+      Face.ensure();
+      renderPanel();
+      break;
+    case 'addKey': addKeyHere(); break;
+    case 'delKey': deleteKey(num(btn.dataset.i, 0)); break;
+    case 'clearKeys': clearKeys(); break;
+    case 'goKey': {
+      if (!o) break;
+      const k = (o.keys || [])[num(btn.dataset.i, 0)];
+      if (k) { engine.seek(k.t + 0.01); renderPanel(); }
+      break;
+    }
     case 'pickMedia': $('fileMedia').click(); break;
     case 'pickBgm': $('fileBgm').click(); break;
     case 'pickFont': $('fileFont').click(); break;
@@ -2081,7 +2601,71 @@ function addBlur(shape) {
   state.sel = { type: 'blur', id: o.id };
   switchTab('stick');
   markDirty(true);
-  toast('블러를 추가했어요. 끌어서 얼굴 위로 옮겨 주세요');
+  toast('블러를 추가했어요. 끌어서 얼굴 위로 옮기고, 모서리 핸들로 크기를 맞춰요');
+}
+
+/* ---------- 얼굴 자동 추적 · 키프레임 ---------- */
+function toggleFaceTrack() {
+  const o = selObj();
+  if (!o || !state.sel || state.sel.type !== 'blur') { toast('블러를 먼저 선택해 주세요'); return; }
+  touchHistory();
+  if (o.track === 'face') {
+    o.track = 'manual';
+    if (!o.keys) o.keys = [];
+    toast('얼굴 자동 추적을 껐어요');
+  } else {
+    o.track = 'face';
+    if (o.faceScale == null) o.faceScale = 1.35;
+    if (o.faceIndex == null) o.faceIndex = -1;
+    if (window.isSecureContext === false) toast('얼굴 추적은 https 주소에서 열어야 동작해요', 3200);
+    Face.ensure();
+  }
+  markDirty(true);
+}
+function sortKeys(o) {
+  if (o.keys) o.keys.sort((a, b) => a.t - b.t);
+}
+function setKeyAt(o, t) {
+  if (!o.keys) o.keys = [];
+  const tt = Math.round(clamp(t, 0, Math.max(0, totalDur())) * 100) / 100;
+  let hit = null;
+  for (const k of o.keys) if (Math.abs(k.t - tt) < 0.12) { hit = k; break; }
+  if (hit) {
+    hit.x = o.x; hit.y = o.y; hit.w = o.w; hit.h = o.h; hit.rot = o.rot || 0;
+  } else {
+    o.keys.push({ t: tt, x: o.x, y: o.y, w: o.w, h: o.h, rot: o.rot || 0 });
+    sortKeys(o);
+  }
+}
+function addKeyHere() {
+  const o = selObj();
+  if (!o || !state.sel || state.sel.type !== 'blur') { toast('블러를 먼저 선택해 주세요'); return; }
+  touchHistory();
+  // 지금 화면에 보이는 위치를 기준으로 찍기
+  const kb = keyBoxAt(o, state.t);
+  if (kb) { o.x = kb.x; o.y = kb.y; o.w = kb.w; o.h = kb.h; o.rot = kb.rot || 0; }
+  const before = (o.keys || []).length;
+  setKeyAt(o, state.t);
+  markDirty(true);
+  toast(before === (o.keys || []).length
+    ? '이 시점의 키프레임을 새 위치로 바꿨어요 (' + fmtS(state.t) + ')'
+    : '키프레임을 찍었어요 (' + fmtS(state.t) + ')');
+}
+function deleteKey(i) {
+  const o = selObj();
+  if (!o || !o.keys) return;
+  touchHistory();
+  o.keys.splice(i, 1);
+  markDirty(true);
+  toast(o.keys.length ? '키프레임을 지웠어요' : '키프레임을 모두 지웠어요');
+}
+function clearKeys() {
+  const o = selObj();
+  if (!o || !o.keys || !o.keys.length) return;
+  touchHistory();
+  o.keys = [];
+  markDirty(true);
+  toast('키프레임을 모두 지웠어요');
 }
 function addSfx(type) {
   Sound.preview(type);
@@ -2222,10 +2806,14 @@ function hitTest(p) {
   for (const o of P.blurs) if (activeAt(o, t)) cands.push({ type: 'blur', o, z: 0 });
   for (let i = cands.length - 1; i >= 0; i--) {
     const c = cands[i];
-    const b = objBox(c.o, c.type);
+    let b;
+    if (c.type === 'blur') {
+      b = blurGeom(c.o, t);
+      if (!b) continue;
+    } else b = objBox(c.o, c.type);
     if (!b.w || !b.h) continue;
-    const rad = (c.o.rot || 0) * Math.PI / 180;
-    const dx = p.x - c.o.x, dy = p.y - c.o.y;
+    const rad = (b.rot || 0) * Math.PI / 180;
+    const dx = p.x - b.x, dy = p.y - b.y;
     const lx = dx * Math.cos(-rad) - dy * Math.sin(-rad);
     const ly = dx * Math.sin(-rad) + dy * Math.cos(-rad);
     if (c.type === 'blur' && c.o.shape === 'circle') {
@@ -2250,10 +2838,42 @@ function bindStage() {
     const p = stagePoint(e);
     if (pointers.size === 1) {
       if (state.playing) engine.stop();
+
+      // 1) 블러 크기 조절 핸들 먼저 확인
+      const sel = selObj();
+      if (sel && state.sel && state.sel.type === 'blur') {
+        const g = blurGeom(sel, state.t);
+        if (g) {
+          const hs = blurHandles(g);
+          let best = -1, bd = 1e9;
+          for (let i = 0; i < hs.length; i++) {
+            const d = Math.hypot(p.x - hs[i].x, p.y - hs[i].y);
+            if (d < bd) { bd = d; best = i; }
+          }
+          if (best >= 0 && bd <= HANDLE_HIT) {
+            touchHistory();
+            stageDrag = {
+              mode: 'scale', type: 'blur', moved: false, face: !!g.face,
+              g: { x: g.x, y: g.y, w: g.w, h: g.h, rot: g.rot || 0 },
+              w0: sel.w, h0: sel.h, fs0: num(sel.faceScale, 1.35)
+            };
+            liveUpdate();
+            return;
+          }
+        }
+      }
+
       const hit = hitTest(p);
       if (hit) {
         state.sel = { type: hit.type, id: hit.o.id };
         touchHistory();
+        if (hit.type === 'blur' && hit.o.track === 'face') {
+          // 얼굴 자동 추적 중에는 얼굴을 따라가므로 끌어서 옮기지 않아요
+          stageDrag = null;
+          syncTabForSelection();
+          liveUpdate();
+          return;
+        }
         stageDrag = { mode: 'move', type: hit.type, sx: p.x, sy: p.y, ox: hit.o.x, oy: hit.o.y, moved: false };
         syncTabForSelection();
         liveUpdate();
@@ -2269,7 +2889,7 @@ function bindStage() {
       const arr = Array.from(pointers.values());
       const dist = Math.max(12, Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y));
       const ang = Math.atan2(arr[1].y - arr[0].y, arr[1].x - arr[0].x);
-      stageDrag = { mode: 'pinch', type: state.sel.type, dist, ang, size: o.size, scale: o.scale, w: o.w, h: o.h, rot: o.rot || 0 };
+      stageDrag = { mode: 'pinch', type: state.sel.type, dist, ang, size: o.size, scale: o.scale, w: o.w, h: o.h, rot: o.rot || 0, fs0: num(o.faceScale, 1.35) };
       touchHistory();
     }
   });
@@ -2288,6 +2908,31 @@ function bindStage() {
       o.x = Math.round(nx);
       o.y = Math.round(ny);
       stageDrag.moved = true;
+      // 키프레임이 있으면 지금 시점에 자동으로 키를 찍습니다
+      if (o.keys && o.keys.length) setKeyAt(o, state.t);
+      liveUpdate();
+    } else if (stageDrag.mode === 'scale') {
+      const g = stageDrag.g;
+      const p = stagePoint(e);
+      const rad = -(g.rot || 0) * Math.PI / 180;
+      const dx = p.x - g.x, dy = p.y - g.y;
+      const lx = dx * Math.cos(rad) - dy * Math.sin(rad);
+      const ly = dx * Math.sin(rad) + dy * Math.cos(rad);
+      const base = Math.hypot(g.w / 2, g.h / 2) || 1;
+      if (stageDrag.face) {
+        const f = Math.hypot(lx, ly) / base;
+        o.faceScale = Math.round(clamp(stageDrag.fs0 * f, 0.8, 3) * 100) / 100;
+      } else if (o.shape === 'circle') {
+        const f = Math.hypot(lx, ly) / base;
+        o.w = Math.round(clamp(g.w * f, 40, 1080));
+        o.h = Math.round(clamp(g.h * f, 40, 1800));
+        if (o.keys && o.keys.length) setKeyAt(o, state.t);
+      } else {
+        o.w = Math.round(clamp(Math.abs(lx) * 2, 40, 1080));
+        o.h = Math.round(clamp(Math.abs(ly) * 2, 40, 1800));
+        if (o.keys && o.keys.length) setKeyAt(o, state.t);
+      }
+      stageDrag.moved = true;
       liveUpdate();
     } else if (stageDrag.mode === 'pinch' && pointers.size >= 2) {
       const arr = Array.from(pointers.values());
@@ -2296,11 +2941,16 @@ function bindStage() {
       const f = dist / stageDrag.dist;
       if (stageDrag.type === 'text' && stageDrag.size) o.size = clamp(stageDrag.size * f, 20, 240);
       if (stageDrag.type === 'sticker' && stageDrag.scale) o.scale = clamp(stageDrag.scale * f, 0.12, 3);
-      if (stageDrag.type === 'blur' && stageDrag.w) {
-        const nw = clamp(stageDrag.w * f, 40, 1080);
-        const ratio = stageDrag.h / stageDrag.w;
-        o.w = Math.round(nw);
-        o.h = Math.round(clamp(nw * ratio, 40, 1800));
+      if (stageDrag.type === 'blur') {
+        if (o.track === 'face') {
+          o.faceScale = Math.round(clamp(stageDrag.fs0 * f, 0.8, 3) * 100) / 100;
+        } else if (stageDrag.w) {
+          const nw = clamp(stageDrag.w * f, 40, 1080);
+          const ratio = stageDrag.h / stageDrag.w;
+          o.w = Math.round(nw);
+          o.h = Math.round(clamp(nw * ratio, 40, 1800));
+          if (o.keys && o.keys.length) setKeyAt(o, state.t);
+        }
       }
       if (stageDrag.type !== 'blur') o.rot = clamp(Math.round(stageDrag.rot + (ang - stageDrag.ang) * 180 / Math.PI), -180, 180);
       liveUpdate();
@@ -2310,7 +2960,7 @@ function bindStage() {
     pointers.delete(e.pointerId);
     if (pointers.size < 2 && stageDrag && stageDrag.mode === 'pinch') stageDrag = null;
     if (pointers.size === 0) {
-      if (stageDrag && stageDrag.mode === 'move' && stageDrag.moved) { renderPanel(); queueDraftSave(); flushHistory(); }
+      if (stageDrag && (stageDrag.mode === 'move' || stageDrag.mode === 'scale') && stageDrag.moved) { renderPanel(); queueDraftSave(); flushHistory(); }
       stageDrag = null;
       guides.v = false; guides.h = false;
       renderOnce();
@@ -2401,6 +3051,17 @@ function normalizeProject(proj) {
     if (c.trimOut == null) c.trimOut = 3;
     if (!c.transition) c.transition = 'none';
   });
+  p.blurs.forEach(b => {
+    if (b.track !== 'face') b.track = 'manual';
+    if (b.faceIndex == null) b.faceIndex = -1;
+    if (b.faceScale == null) b.faceScale = 1.35;
+    if (!Array.isArray(b.keys)) b.keys = [];
+    b.keys = b.keys.filter(k => k && Number.isFinite(num(k.t, NaN))).map(k => ({
+      t: num(k.t, 0), x: num(k.x, b.x), y: num(k.y, b.y), w: num(k.w, b.w), h: num(k.h, b.h), rot: num(k.rot, 0)
+    })).sort((a, c) => a.t - c.t);
+    if (b.strength == null) b.strength = 16;
+    if (b.opacity == null) b.opacity = 1;
+  });
   return p;
 }
 async function restoreProjectFile(file) {
@@ -2429,8 +3090,9 @@ async function restoreProjectFile(file) {
       } catch (e) { }
     }
     history.past.length = 0; history.future.length = 0; history.pending = null;
+    Face.reset();
     markDirty(false);
-    toast('백업을 불러왔어요' + (P.clips.length ? ' (클립 ' + P.clips.length + '개)' : ''));
+    toast('백업을 불러왔어요' + (P.clips.length ? ' (클립 ' + P.clips.length + '개 · 미디어 ' + media.size + '개)' : ''));
   } catch (e) {
     toast('복원 실패: ' + (e && e.message ? e.message : e));
   }
@@ -2505,6 +3167,10 @@ async function exportVideo() {
   $('exportDone').classList.add('hidden');
   $('exportProgress').classList.remove('hidden');
   updateExportUI(0);
+  // 얼굴 추적을 쓰는 프로젝트면 첫 프레임부터 얼굴을 찾도록 미리 한 번 감지합니다
+  if (Face.want() && Face.status === 'ready') {
+    try { Face.lastRun = 0; drawFrame(cv, 0, { noSelection: true }); } catch (e) { }
+  }
   try { rec.start(700); } catch (e) {
     $('exportModal').classList.remove('show');
     cleanupCanvas();
@@ -2693,6 +3359,7 @@ async function bootDraft() {
   state.sel = null;
   state.t = 0;
   renderAll();
+  setSaveState('saved', (data.draft && data.draft.savedAt) || Date.now());
   if (loaded || P.clips.length) toast('이전 작업을 이어 왔어요 (' + P.clips.length + '개 클립)');
   return true;
 }
@@ -2725,6 +3392,7 @@ async function boot() {
 
   ensureFont('pretendard');
   await bootDraft();
+  if (!saveState.at) setSaveState('idle');
   ensureFont('pretendard');
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => { layoutCache.clear(); renderOnce(); });
@@ -2743,7 +3411,9 @@ window.DoreStudio = {
   deleteSelected, undo, redo, saveProject, restoreProjectFile, exportVideo,
   get exportResult() { return exportResult; },
   switchTab, renderAll, renderPanel, renderTimeline, renderOnce, engine, Sound, Draft,
-  defaultText, defaultSticker, defaultBlur, hitTest, textBox, layoutText, clipSpans, totalDur, objBox
+  defaultText, defaultSticker, defaultBlur, hitTest, textBox, layoutText, clipSpans, totalDur, objBox,
+  Face, keyBoxAt, blurGeom, blurHandles, setKeyAt, addKeyHere, toggleFaceTrack, drawFrame, drawBlurAt,
+  get saveState() { return saveState; }, setSaveState, HANDLE_R, HANDLE_HIT
 };
 
 })();
