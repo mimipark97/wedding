@@ -2995,8 +2995,8 @@ function renderTimeline() {
   }
   for (const o of P.blurs) {
     const s = clamp(o.start || 0, 0, dur), e = clamp(o.end == null ? dur : o.end, s + 0.05, Math.max(dur, s + 0.05));
-    const tag = o.track === 'face' ? '✨얼굴' : (o.shape === 'circle' ? '⭕' : '⬜');
-    hObjs += '<div class="tl-block blur' + (sel.type === 'blur' && sel.id === o.id ? ' sel' : '') + (o.track === 'face' ? ' face' : '') + '" data-type="blur" data-id="' + o.id + '" style="left:' + (s * pps) + 'px;width:' + Math.max(10, (e - s) * pps) + 'px">' + tag + ' 블러</div>';
+    const tag = o.track === 'baked' ? '✨얼굴' : (o.shape === 'circle' ? '⭕' : '⬜');
+    hObjs += '<div class="tl-block blur' + (sel.type === 'blur' && sel.id === o.id ? ' sel' : '') + (o.track === 'baked' ? ' face' : '') + '" data-type="blur" data-id="' + o.id + '" style="left:' + (s * pps) + 'px;width:' + Math.max(10, (e - s) * pps) + 'px">' + tag + ' 블러</div>';
     if (o.keys && o.keys.length) {
       for (const k of o.keys) hObjs += '<i class="kf" style="left:' + clamp(k.t * pps, 0, Math.max(0, w - 6)) + 'px"></i>';
     }
@@ -4265,7 +4265,7 @@ function bindStage() {
       if (hit) {
         state.sel = { type: hit.type, id: hit.o.id };
         touchHistory();
-        if (hit.type === 'blur' && hit.o.track === 'face') {
+        if (hit.type === 'blur' && hit.o.track === 'baked') {
           // 얼굴 자동 추적 중에는 얼굴을 따라가므로 끌어서 옮기지 않아요
           stageDrag = null;
           syncTabForSelection();
@@ -4306,8 +4306,8 @@ function bindStage() {
       o.x = Math.round(nx);
       o.y = Math.round(ny);
       stageDrag.moved = true;
-      // 키프레임이 있으면 지금 시점에 자동으로 키를 찍습니다
-      if (o.keys && o.keys.length) setKeyAt(o, state.t);
+      // 키프레임이 있으면 지금 시점에 자동으로 키를 찍습니다 (구운 블러는 제외)
+      if (o.keys && o.keys.length && o.track !== 'baked') setKeyAt(o, state.t);
       liveUpdate();
     } else if (stageDrag.mode === 'scale') {
       const g = stageDrag.g;
@@ -4355,7 +4355,7 @@ function bindStage() {
       if (stageDrag.type === 'sticker' && stageDrag.scale) o.scale = clamp(stageDrag.scale * f, 0.12, 3);
       if (stageDrag.type === 'pip' && stageDrag.w) o.w = clamp(stageDrag.w * f, 80, 1080);
       if (stageDrag.type === 'blur') {
-        if (o.track === 'face') {
+        if (o.track === 'baked') {
           o.faceScale = Math.round(clamp(stageDrag.fs0 * f, 0.8, 3) * 100) / 100;
         } else if (stageDrag.w) {
           const nw = clamp(stageDrag.w * f, 40, 1080);
