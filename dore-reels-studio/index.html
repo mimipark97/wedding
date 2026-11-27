@@ -22,7 +22,7 @@
   --shadow:0 4px 14px rgba(120,86,66,.10);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:var(--cream);color:var(--ink);
+html,body{margin:0;height:100%;background:var(--cream);color:var(--ink);touch-action:pan-x pan-y;
   font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
   font-size:13px;line-height:1.35;overscroll-behavior:none}
 body{-webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%}
@@ -110,7 +110,7 @@ button.wide{width:100%;padding:10px 8px;font-size:12px}
 .tl-time{font-variant-numeric:tabular-nums;font-size:11.5px;color:var(--sub);font-weight:700;min-width:82px}
 .tl-head .spacer{flex:1}
 .tl-head .tool{font-size:11px;padding:6px 7px;border-radius:9px}
-.tl-scroll{position:relative;overflow-x:auto;overflow-y:hidden;padding-bottom:3px;-webkit-overflow-scrolling:touch}
+.tl-scroll{position:relative;overflow-x:auto;overflow-y:hidden;padding-bottom:3px;-webkit-overflow-scrolling:touch;touch-action:pan-x}
 .tl-body{position:relative;display:inline-block;min-width:100%}
 .tl-ruler{height:15px;margin-left:54px;position:relative;border-bottom:1px dashed #F0E2D7}
 .tl-ruler span{position:absolute;top:2px;font-size:8.5px;color:#B6A69D;transform:translateX(-50%)}
@@ -123,7 +123,9 @@ button.wide{width:100%;padding:10px 8px;font-size:12px}
 .tl-track[data-track="clips"]{height:35px}
 .tl-block{position:absolute;top:2px;bottom:2px;border-radius:6px;overflow:hidden;
   font-size:9px;font-weight:700;color:#5A3B46;padding:3px 4px;background:var(--pink3);border:1px solid #FFD2DF;
-  display:flex;align-items:center;white-space:nowrap;text-overflow:ellipsis;touch-action:none}
+  display:flex;align-items:center;white-space:nowrap;text-overflow:ellipsis;touch-action:none;
+  -webkit-user-drag:none;-webkit-touch-callout:none}
+.tl-block,.tl-block *{touch-action:none}
 .tl-block.clip{background:linear-gradient(180deg,#FFF0F3,#FFDDE7);border-color:#F7C4D3;color:#6A3346}
 .tl-block.clip.img{background:linear-gradient(180deg,#F3F9E4,#E3F1C4);border-color:#CFE39E;color:#4A5722}
 .tl-block.text{background:#E8F0FF;border-color:#C9DAF8;color:#2F4A78}
@@ -380,12 +382,43 @@ button.tm-apply{background:#1D1C1E;border-color:#000;color:#fff;font-weight:800;
 
 /* 텍스트 독이 열리면 캔버스가 다 보이게 위 공간을 확보 */
 #app.dock-open .stage{height:min(30vh,300px)}
-#app.dock-open .timeline{display:none}
+/* 키보드 독이 열려 있어도 이동 바는 남긴다 — 자주 쓰는 도구 줄만 접어 공간 확보 */
+#app.dock-open .timeline{display:block;margin-top:2px}
+#app.dock-open .timeline .tl-scroll,
+#app.dock-open .timeline .tl-head.tools{display:none}
 #app.dock-open .tabs{display:none}
 #app.dock-open .panels{padding-bottom:46vh}
 @media (max-height:700px){
   #app.dock-open .stage{height:min(26vh,220px)}
 }
+
+/* ---------- ☁️ 클라우드 동기화 ---------- */
+.save-mini.cloud{background:#F1F7FD;border-color:#D7E7F5;color:#2E628F}
+.save-mini.cloud.on{background:#E9F4FF;border-color:#BCDAF4;color:#1F4E7A;font-weight:800}
+.save-mini.cloud.working{background:#FFF7E4;border-color:#F2E3BE;color:#B4863A;animation:pulse 1.4s ease-in-out infinite}
+.save-mini.cloud.err{background:#FFF0EC;border-color:#F6D5CB;color:#B4432F}
+.cloud-card{max-width:330px}
+.cloud-note{font-size:11px;line-height:1.5;margin:2px 0 10px}
+.cloud-field{display:block;margin-bottom:8px}
+.cloud-field>span{display:block;font-size:10.5px;font-weight:800;color:var(--sub);margin-bottom:3px}
+.cloud-field input{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:#FFFCF8;font-size:13px;-webkit-user-select:text;user-select:text}
+.cloud-field input:focus{outline:none;border-color:#BCDAF4;box-shadow:0 0 0 3px #EAF4FF}
+.cloud-pw{position:relative;display:block}
+.cloud-pw input{padding-right:40px}
+.cloud-pw button{position:absolute;right:3px;top:50%;transform:translateY(-50%);width:32px;height:30px;padding:0;background:transparent;border:0;font-size:15px}
+.cloud-msg{min-height:14px;font-size:10.5px;color:#B4432F;font-weight:700;margin:6px 0 0;text-align:center}
+.cloud-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.cloud-row span{color:var(--sub);font-weight:700;flex:0 0 auto}
+.cloud-row b{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:66%;text-align:right}
+
+/* ---------- 선택 블록 이동 바 (터치 한 번으로 컷 이동) ---------- */
+.clipbar.objbar{gap:5px}
+.objbar .ob-btn{padding:4px 8px;font-size:10px;border-radius:8px;background:#fff;border:1px solid #DDE8F7;
+  color:#2F4A78;font-weight:800;flex:0 0 auto;touch-action:manipulation}
+.objbar .ob-btn.pri{background:linear-gradient(180deg,#E9F1FF,#D3E4FF);border-color:#BCD4F8;color:#1F3E70}
+.objbar .ob-time{margin-left:auto;font-size:9.5px;color:var(--sub);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sheet-list .sheet-title{color:#fff;opacity:.62;font-size:11px;font-weight:800;text-align:center;padding:4px 2px 2px;letter-spacing:-.2px}
+.sheet-list button.on{background:rgba(255,183,201,.28);box-shadow:inset 0 0 0 1.5px rgba(255,183,201,.7)}
 
 </style>
 </head>
@@ -402,9 +435,10 @@ button.tm-apply{background:#1D1C1E;border-color:#000;color:#fff;font-weight:800;
 
   <div class="savebar">
     <span id="saveState" class="save-state idle"><i class="dot"></i>자동저장 켜짐</span>
+    <button id="btnCloud" class="save-mini cloud" title="폰·PC 자동 동기화 연결">☁️ 클라우드 연결</button>
     <button id="btnSave" class="save-mini" title="사진·영상까지 담은 프로젝트 백업(.json)">💾 저장</button>
     <button id="btnRestore" class="save-mini" title="백업 .json 복원">📂 복원</button>
-    <span class="savebar-hint">다른 기기는 저장 → 복원으로 옮겨요</span>
+    <span class="savebar-hint" id="saveHint">다른 기기는 저장 → 복원으로 옮겨요</span>
   </div>
 
   <div class="stage-area" id="stageArea">
@@ -441,6 +475,8 @@ button.tm-apply{background:#1D1C1E;border-color:#000;color:#fff;font-weight:800;
     <div class="text-bar hidden" id="textBar">
       <button data-act="objDelete" title="삭제">🗑</button>
       <button data-act="dupObj" title="복제">⧉</button>
+      <button data-act="objBack" title="0.5초 앞으로">◀.5</button>
+      <button data-act="objFwd" title="0.5초 뒤로">.5▶</button>
       <button data-act="textMore" title="더 보기">⋯</button>
       <button class="tb-wide" data-act="textToCut">원하는 컷에 붙이기</button>
     </div>
@@ -472,6 +508,13 @@ button.tm-apply{background:#1D1C1E;border-color:#000;color:#fff;font-weight:800;
       <div class="cb-group"><span>배속</span><button data-clipact="speedDown">−</button><b id="cbSpeed">1.0x</b><button data-clipact="speedUp">+</button></div>
       <div class="cb-group"><span>앞</span><button data-clipact="inDown">−</button><b id="cbIn">0.0</b><button data-clipact="inUp">+</button></div>
       <div class="cb-group"><span>뒤</span><button data-clipact="outDown">−</button><b id="cbOut">3.0</b><button data-clipact="outUp">+</button></div>
+    </div>
+    <div class="clipbar objbar hidden" id="objBar">
+      <span class="cb-name" id="obName">자막</span>
+      <button class="ob-btn" data-objact="back">◀ 0.5s</button>
+      <button class="ob-btn" data-objact="fwd">0.5s ▶</button>
+      <button class="ob-btn pri" data-objact="cut">🎯 원하는 컷으로 이동</button>
+      <span class="ob-time" id="obTime"></span>
     </div>
     <div class="tl-scroll" id="tlScroll">
       <div class="tl-body">
@@ -579,12 +622,42 @@ button.tm-apply{background:#1D1C1E;border-color:#000;color:#fff;font-weight:800;
   </div>
 </div>
 
+<div class="modal" id="cloudModal">
+  <div class="card cloud-card">
+    <h3 id="cloudTitle">☁️ 클라우드 연결</h3>
+    <p class="muted cloud-note" id="cloudNote">폰과 PC에서 같은 이메일로 로그인하면 올린 영상과 편집 내용이 자동 동기화됩니다.<br>영상·사진은 내 계정에만 보이는 비공개 저장소에 올라가요.</p>
+    <div id="cloudForm">
+      <label class="cloud-field"><span>이메일</span>
+        <input id="cloudEmail" type="email" inputmode="email" autocomplete="username" autocapitalize="off" placeholder="you@example.com">
+      </label>
+      <label class="cloud-field"><span>비밀번호</span>
+        <span class="cloud-pw">
+          <input id="cloudPw" type="password" autocomplete="current-password" placeholder="6자 이상">
+          <button type="button" id="cloudPwEye" aria-label="비밀번호 보기">👁</button>
+        </span>
+      </label>
+      <button class="primary wide" id="cloudSubmit">로그인</button>
+      <button class="ghost wide" id="cloudSwitch" style="margin-top:6px">처음이에요 · 회원가입</button>
+      <p class="cloud-msg" id="cloudMsg"></p>
+    </div>
+    <div id="cloudAccount" class="hidden">
+      <div class="cloud-row"><span>계정</span><b id="cloudWho">-</b></div>
+      <div class="cloud-row"><span>상태</span><b id="cloudStatus">-</b></div>
+      <div class="cloud-row"><span>마지막 동기화</span><b id="cloudLast">-</b></div>
+      <button class="primary wide" id="cloudSyncNow" style="margin-top:10px">지금 동기화</button>
+      <button class="ghost wide" id="cloudLogout" style="margin-top:6px">로그아웃</button>
+    </div>
+    <button class="ghost wide" data-close="1" style="margin-top:6px">닫기</button>
+  </div>
+</div>
+
 <div class="modal" id="helpModal">
   <div class="card">
     <h3>도레 릴스 스튜디오 사용법</h3>
     <ol class="steps">
       <li><b>미디어·BGM</b> 탭에서 <b>+ 사진첩</b>으로 사진·영상을 올려요. 한 개만 고르면 <b>구간 선택</b> 창이 떠서 쓸 부분만 잘라 넣고, 여러 개면 바로 올라가요.</li>
       <li>타임라인 위 <b>🔍 줌</b>(또는 두 손가락)으로 늘리면 <b>0.1초 눈금</b>까지 펼쳐져요. <b>◀0.1 / 0.1▶</b>로 미세 이동하고 <b>✂️ 분할</b>하면 초단위로 정확히 잘려요.</li>
+      <li>클립을 고르면 <b>◀◀ / ▶▶</b>로 순서를 바꾸고(재생바가 그 컷으로 따라와요), 블록을 고르면 타임라인 아래 <b>◀0.5s · 0.5s▶ · 🎯 원하는 컷으로 이동</b> 버튼으로 터치 한 번에 정확히 옮길 수 있어요.</li>
       <li>클립을 고르고 <b>✂️ 구간 선택</b>을 누르면 노란 핸들·숫자 입력으로 시작·끝·길이를 다시 정할 수 있어요. 사진은 0.5~15초.</li>
       <li>영상·사진 위에 다른 사진·영상을 얹으려면 아래 <b>＋ 붙이기</b>를 눌러요. 사진/영상/스티커/텍스트를 고르고, 이동·크기·회전·모서리 둥글기·불투명도·노출 구간을 조절해요. 붙인 영상은 재생·MP4 저장 때 같이 움직여요.</li>
       <li><b>구간·자막</b>에서 자막을 추가하면 캔버스에 <b>↻ 회전 · ⤢ 크기</b> 핸들과 미니 바(🗑 · ⧉ · 원하는 컷에 붙이기)가 떠요. 왼쪽 세로 슬라이더는 <b>크기(pt)</b>, 오른쪽은 <b>자간·기울기·투명도</b>예요.</li>
@@ -593,7 +666,7 @@ button.tm-apply{background:#1D1C1E;border-color:#000;color:#fff;font-weight:800;
       <li>블러를 고르고 <b>✨ 얼굴 자동 추적</b>을 켜면 진행 배지가 뜨고, 클립을 <b>0.3초 간격으로 한 번만</b> 훑어 얼굴 위치를 키프레임으로 구워요. 그 뒤 재생·편집·MP4 저장은 AI를 돌리지 않아 60fps로 부드럽게 따라가요. 사진 한 장은 1초 안에 끝나요.</li>
       <li>다 됐으면 <b>내보내기</b> → 공유 → "비디오 저장"으로 사진첩에 저장해요.</li>
     </ol>
-    <p>작업은 이 브라우저에 자동 저장돼요(위쪽 <b>자동저장됨</b> 표시). 다른 기기로 옮기려면 <b>💾 저장</b>으로 .json 백업을 받아 두고, 그 기기에서 <b>📂 복원</b>으로 열어요.</p>
+    <p>작업은 이 브라우저에 자동 저장돼요(위쪽 <b>자동저장됨</b> 표시). <b>☁️ 클라우드</b>를 한 번 연결해 두면 폰에서 올린 사진·영상과 편집 내용이 PC에서도 같은 이메일로 로그인만 하면 자동으로 이어져요. 클라우드 없이 옮기려면 <b>💾 저장</b> → 다른 기기에서 <b>📂 복원</b>을 써요.</p>
     <p>얼굴 자동 추적은 처음 켤 때만 AI 모델(약 2MB)을 인터넷에서 받아요. 그 뒤로는 오프라인에서도 키프레임만으로 동작해요.</p>
     <button class="primary" data-close="1" style="width:100%;margin-top:8px">확인</button>
   </div>
@@ -918,6 +991,7 @@ const Draft = {
       tx.objectStore('media').put({ id: m.id, name: m.name, kind: m.kind, type: m.type, blob: m.blob });
       await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
       this.savedMedia.add(m.id);
+      if (typeof Cloud !== 'undefined') Cloud.onMediaSaved(m);
     } catch (e) { }
   },
   async load() {
@@ -954,6 +1028,7 @@ function queueDraftSave() {
   setSaveState('pending');
   clearTimeout(draftTimer);
   draftTimer = setTimeout(() => { Draft.save(); }, 1200);
+  if (typeof Cloud !== 'undefined') Cloud.touch();   // 클라우드에 2.6초 디바운스로 자동 저장
 }
 
 /* ---------------- 자동 저장 상태 표시 ---------------- */
@@ -3010,6 +3085,7 @@ function renderTimeline() {
     hAudio += '<div class="tl-block sfx' + (sel.type === 'sfx' && sel.id === s2.id ? ' sel' : '') + '" data-type="sfx" data-id="' + s2.id + '" style="left:' + ((s2.time || 0) * pps) + 'px;width:34px">🔊</div>';
   }
   updateClipBar();
+  updateObjBar();
   lanes.clips.innerHTML = hClips;
   lanes.texts.innerHTML = hTexts;
   lanes.objs.innerHTML = hObjs;
@@ -3028,6 +3104,61 @@ function updateClipBar() {
   $('cbSpeed').textContent = (Math.round((c.speed || 1) * 10) / 10) + 'x';
   $('cbIn').textContent = (Math.round(c.trimIn * 10) / 10).toFixed(1);
   $('cbOut').textContent = (Math.round(c.trimOut * 10) / 10).toFixed(1);
+}
+
+/* ---------- 선택한 블록(자막·스티커·불러·붙이기·BGM/효과음) 이동 바 ---------- */
+function selAnyObj() {
+  if (!state.sel) return null;
+  const t = state.sel.type, id = state.sel.id;
+  if (t === 'bgm') return P.bgm.find(b => b.id === id) || null;
+  if (t === 'sfx') return P.sfx.find(s => s.id === id) || null;
+  return selObj();
+}
+function objSpan(o, type) {
+  if (!o) return { s: 0, e: 0 };
+  if (type === 'sfx') return { s: num(o.time, 0), e: num(o.time, 0) + 0.4 };
+  const s = num(o.start, 0);
+  return { s, e: o.end == null ? totalDur() : num(o.end, s) };
+}
+function updateObjBar() {
+  const bar = $('objBar');
+  if (!bar) return;
+  const sel = state.sel;
+  const kind = sel ? sel.type : '';
+  const ok = ['text', 'sticker', 'blur', 'pip', 'sfx', 'bgm'].indexOf(kind) >= 0 && !!selAnyObj();
+  bar.classList.toggle('hidden', !ok);
+  if (!ok) return;
+  const label = { text: '자막', sticker: '스티커', blur: '블러', pip: '붙이기', sfx: '효과음', bgm: 'BGM' }[kind] || '블록';
+  if ($('obName')) $('obName').textContent = label;
+  const o = selAnyObj();
+  const sp = objSpan(o, kind);
+  if ($('obTime')) $('obTime').textContent = fmtClock(sp.s) + ' – ' + fmtClock(sp.e);
+}
+function nudgeSelectedObj(dt) {
+  const o = selAnyObj();
+  if (!o || !state.sel) { toast('먼저 타임라인에서 옮길 블록을 눌러 주세요'); return; }
+  const type = state.sel.type;
+  const dur = Math.max(0, totalDur());
+  touchHistory();
+  let at = 0;
+  if (type === 'sfx') {
+    o.time = Math.round(clamp(num(o.time, 0) + dt, 0, dur) * 10) / 10;
+    at = o.time;
+  } else if (type === 'bgm') {
+    o.start = Math.round(clamp(num(o.start, 0) + dt, 0, Math.max(0, dur - 0.1)) * 10) / 10;
+    at = o.start;
+  } else {
+    const s0 = num(o.start, 0);
+    const len = Math.max(0.3, (o.end == null ? dur : num(o.end, s0)) - s0);
+    const s = clamp(s0 + dt, 0, Math.max(0, dur - len));
+    o.start = Math.round(s * 10) / 10;
+    o.end = Math.round((s + len) * 10) / 10;
+    at = o.start;
+  }
+  state.t = clamp(at + 0.02, 0, dur);
+  markDirty(true);
+  try { engine.seek(state.t); } catch (e) { }
+  toast((dt > 0 ? '+' : '') + dt.toFixed(1) + '초 → ' + fmtClock(at), 1200);
 }
 function adjustClip(act) {
   const c = selClip();
@@ -3066,11 +3197,20 @@ function bindTimeline() {
     const b = e.target.closest('button');
     if (b && b.dataset.clipact) adjustClip(b.dataset.clipact);
   });
+  const ob = $('objBar');
+  if (ob) ob.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b || !b.dataset.objact) return;
+    const act = b.dataset.objact;
+    if (act === 'back') nudgeSelectedObj(-0.5);
+    else if (act === 'fwd') nudgeSelectedObj(0.5);
+    else if (act === 'cut') chooseCutForSelected();
+  });
   const sc = $('tlScroll');
   sc.addEventListener('pointerdown', (e) => {
     tlPtrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (tlPtrs.size >= 2) {
-      // 두 손가락 = 타임라인 줌
+      // 두 손가락 = 타임라인 줌 (페이지 확대는 gesture 이벤트로 막아 둠)
       tlDrag = null;
       const a = Array.from(tlPtrs.values());
       tlPinch = { d0: Math.max(16, Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y)), z0: state.tlZoom, t: state.t };
@@ -3091,7 +3231,7 @@ function bindTimeline() {
       const o = type === 'clip' ? P.clips.find(c => c.id === id) : type === 'bgm' ? P.bgm.find(b => b.id === id) : selObj();
       if (o && type !== 'clip') {
         touchHistory();
-        tlDrag = { mode: 'block', id, type, x0: e.clientX, s0: o.start != null ? o.start : (o.time || 0), e0: o.end, o };
+        tlDrag = { mode: 'block', id, type, x0: e.clientX, moved: false, s0: o.start != null ? o.start : (o.time || 0), e0: o.end, o };
         try { sc.setPointerCapture(e.pointerId); } catch (err) { }
         if (type !== 'bgm' && type !== 'sfx' && (state.t < (o.start || 0) || state.t > (o.end == null ? 1e9 : o.end))) {
           engine.seek((o.start || 0) + 0.02);
@@ -3118,7 +3258,12 @@ function bindTimeline() {
     if (tlDrag.mode === 'scrub') { engine.seek(timelineTimeAt(e.clientX).t); return; }
     if (tlDrag.mode === 'block') {
       const pps = tlPps();
-      const dt = (e.clientX - tlDrag.x0) / pps;
+      const dx = e.clientX - tlDrag.x0;
+      if (!tlDrag.moved) {                 // 손가락이 살짝 흔들린 탭은 이동으로 보지 않음
+        if (Math.abs(dx) < 5) return;
+        tlDrag.moved = true;
+      }
+      const dt = dx / pps;
       const o = tlDrag.o;
       const dur = Math.max(0.1, totalDur());
       if (tlDrag.type === 'sfx') { o.time = clamp(tlDrag.s0 + dt, 0, dur); }
@@ -3136,7 +3281,7 @@ function bindTimeline() {
     tlPtrs.delete(e.pointerId);
     if (tlPtrs.size < 2) tlPinch = null;
     if (!tlDrag) return;
-    if (tlDrag.mode === 'block') { tlDrag = null; renderPanel(); queueDraftSave(); flushHistory(); }
+    if (tlDrag.mode === 'block') { tlDrag = null; updateObjBar(); renderPanel(); queueDraftSave(); flushHistory(); }
     else tlDrag = null;
   };
   sc.addEventListener('pointerup', endDrag);
@@ -3576,6 +3721,8 @@ function panelAction(act, btn) {
     case 'pipBack': movePip(-1); break;
     case 'dupObj': duplicateSelected(); break;
     case 'textToCut': chooseCutForSelected(); break;
+    case 'objBack': nudgeSelectedObj(-0.5); break;
+    case 'objFwd': nudgeSelectedObj(0.5); break;
     case 'textMore':
       switchTab('design');
       toast('자막 색·테두리·그림자·배경은 디자인 탭에서 조절해요', 2200);
@@ -3910,16 +4057,21 @@ function duplicateSelected() {
 }
 /* 원하는 컷에 붙이기 — 클립 목록에서 골라 그 컷 위치로 옮깁니다 */
 function chooseCutForSelected() {
-  const o = selObj();
-  if (!o || !state.sel) return;
+  const o = selAnyObj();
+  const kind = state.sel ? state.sel.type : '';
+  if (!o || !state.sel) { toast('먼저 타임라인에서 옮길 블록을 눌러 주세요'); return; }
   const spans = clipSpans();
   if (!spans.length) { toast('클립이 없어요'); return; }
   const sh = $('sheet');
   const len = Math.max(0.3, (o.end == null ? totalDur() : o.end) - (o.start || 0));
   sh.dataset.mode = 'cut';
-  sh.querySelector('.sheet-list').innerHTML = spans.map((sp, i) =>
-    '<button data-cut="' + i + '">컷 ' + (i + 1) + ' · ' + fmtS(sp.start) + '–' + fmtS(sp.start + sp.dur) + '<br><small style="opacity:.6">' +
-    esc(String(sp.clip.name || '').slice(0, 20)) + '</small></button>').join('') +
+  const cur = clipAt(kind === 'sfx' ? num(o.time, 0) : num(o.start, 0));
+  sh.querySelector('.sheet-list').innerHTML =
+    '<div class="sheet-title">🎯 어느 컷으로 옮길까요?</div>' +
+    spans.map((sp, i) =>
+      '<button data-cut="' + i + '"' + (cur && cur.index === i ? ' class="on"' : '') + '>컷 ' + (i + 1) + ' · ' + fmtS(sp.start) + '–' + fmtS(sp.start + sp.dur) +
+      (cur && cur.index === i ? ' <small>(지금)</small>' : '') +
+      '<br><small style="opacity:.6">' + esc(String(sp.clip.name || '').slice(0, 20)) + '</small></button>').join('') +
     '<button data-cut="cancel" class="cancel">취소</button>';
   sh.classList.add('show');
   sh.querySelectorAll('[data-cut]').forEach(b => {
@@ -3930,13 +4082,17 @@ function chooseCutForSelected() {
       const sp = spans[num(v, 0)];
       if (!sp) return;
       touchHistory();
-      o.start = Math.round(sp.start * 10) / 10;
-      o.end = Math.round(Math.min(totalDur(), sp.start + len) * 10) / 10;
-      if (o.end <= o.start + 0.2) o.end = Math.min(totalDur(), o.start + 0.5);
-      state.t = o.start + 0.02;
+      if (kind === 'sfx') {
+        o.time = Math.round(clamp(sp.start, 0, totalDur()) * 10) / 10;
+      } else {
+        o.start = Math.round(sp.start * 10) / 10;
+        o.end = Math.round(Math.min(totalDur(), sp.start + len) * 10) / 10;
+        if (o.end <= o.start + 0.2) o.end = Math.min(totalDur(), o.start + 0.5);
+      }
+      state.t = clamp(sp.start + 0.02, 0, Math.max(0, totalDur()));
       markDirty(true);
-      engine.seek(state.t);
-      toast('컷 ' + (spans.indexOf(sp) + 1) + '에 붙였어요');
+      try { engine.seek(state.t); } catch (e) { }
+      toast('컷 ' + (spans.indexOf(sp) + 1) + ' 시작점으로 옮겼어요');
     };
   });
 }
@@ -4039,8 +4195,14 @@ function moveClip(dir) {
   touchHistory();
   P.clips.splice(i, 1);
   P.clips.splice(j, 0, c);
+  state.sel = { type: 'clip', id: c.id };
+  // 순서가 바뀌면 재생바가 그 컷으로 바로 따라감(touch 즉시 확인 가능)
+  const sp = clipSpans().find(x => x.clip.id === c.id);
+  const at = sp ? clamp(sp.start + 0.02, 0, Math.max(0, totalDur())) : state.t;
+  state.t = at;
   markDirty(true);
-  toast(dir < 0 ? '앞으로 옮겼어요' : '뒤로 옮겼어요');
+  try { engine.seek(at); } catch (e) { }
+  toast(dir < 0 ? '앞으로 옮겼어요 · 컷 ' + (j + 1) : '뒤로 옮겼어요 · 컷 ' + (j + 1), 1300);
 }
 function splitAtPlayhead() {
   const t = state.t;
@@ -4714,6 +4876,426 @@ function textQuick(q) {
 }
 
 /* ============================================================
+   ☁️ 클라우드 동기화 (Supabase) — 본인 계정만 접근하는 비공개 저장소
+   · 프로젝트 JSON  → public.reels_projects (id = user_id + '_latest')
+   · 사진·영상·BGM  → storage 'reels-media' 버킷 (경로: {uid}/{mediaId})
+   · anon key는 RLS(본인 행/본인 폴더만) 걸린 공개 클라이언트 키예요.
+   ============================================================ */
+const CLOUD = {
+  url: 'https://rnabmisqwbvoorqutskw.supabase.co',
+  key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJuYWJtaXNxd2J2b29ycXV0c2t3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU3Njc0MDUsImV4cCI6MjExMTM0MzQwNX0.C3OR1ID8oJakioE7aJRWF0gX-_tCL5Y4gBaQfFxj2jA',
+  bucket: 'reels-media',
+  table: 'reels_projects',
+  maxFile: 50 * 1024 * 1024,   // 한 파일 50MB까지 (무료 1GB 한도)
+  debounce: 2600
+};
+
+let _sbLibPromise = null;
+function cloudLib() {
+  if (window.supabase && window.supabase.createClient) return Promise.resolve(window.supabase);
+  if (_sbLibPromise) return _sbLibPromise;
+  _sbLibPromise = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    s.async = true;
+    s.onload = () => (window.supabase && window.supabase.createClient)
+      ? res(window.supabase)
+      : rej(new Error('supabase-js를 읽지 못했어요'));
+    s.onerror = () => { _sbLibPromise = null; rej(new Error('인터넷 연결을 확인해 주세요')); };
+    document.head.appendChild(s);
+  });
+  return _sbLibPromise;
+}
+
+const Cloud = {
+  sb: null, user: null, rowId: '', phase: 'off', lastSync: 0,
+  pushTimer: 0, pending: new Set(), busy: false, suppress: false,
+  uploaded: new Set(), mode: 'login', booted: false, warned: new Set(),
+
+  signedIn() { return !!this.user; },
+  upKey() { return 'dore.cloud.up.' + (this.user ? this.user.id : 'none'); },
+  readUploaded() {
+    try { const v = JSON.parse(localStorage.getItem(this.upKey()) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+  },
+  writeUploaded() {
+    try { localStorage.setItem(this.upKey(), JSON.stringify(Array.from(this.uploaded))); } catch (e) { }
+  },
+  setPhase(p) { this.phase = p; this.paint(); },
+
+  /* ---------------- 시작 ---------------- */
+  async init() {
+    if (this.booted) return;
+    this.booted = true;
+    this.bindUI();
+    this.paint();
+    try {
+      const lib = await cloudLib();
+      this.sb = lib.createClient(CLOUD.url, CLOUD.key, {
+        auth: {
+          persistSession: true, autoRefreshToken: true, detectSessionInUrl: false,
+          storageKey: 'dore-cloud-auth'
+        }
+      });
+      const res = await this.sb.auth.getSession();
+      const sess = res && res.data ? res.data.session : null;
+      if (sess && sess.user) await this.applyUser(sess.user, false);
+      else this.setPhase('signedout');
+      this.sb.auth.onAuthStateChange((ev) => {
+        if (ev === 'SIGNED_OUT') { this.user = null; this.rowId = ''; this.setPhase('signedout'); }
+      });
+    } catch (e) {
+      this.setPhase('error');
+    }
+  },
+
+  async applyUser(user, isNew) {
+    if (!user) return;
+    this.user = user;
+    this.rowId = user.id + '_latest';
+    this.uploaded = new Set(this.readUploaded());
+    this.setPhase('working');
+    this.paint();
+    if (isNew) {
+      // 새 계정: 이 기기의 작업을 올려서 시작
+      this.uploadMissing();
+      await this.pushNow(true);
+      return;
+    }
+    await this.afterLogin();
+  },
+
+  async afterLogin() {
+    if (!this.sb || !this.user) return;
+    try {
+      const row = await this.fetchRow();
+      const cloudAt = row ? (Date.parse(row.updated_at) || 0) : 0;
+      const localAt = (saveState && saveState.at) || 0;
+      const localHas = (P.clips.length + P.texts.length + P.stickers.length + P.blurs.length + (P.pips || []).length) > 0;
+      if (row && (!localHas || cloudAt > localAt + 1000)) {
+        const ok = await this.restore(row);
+        if (ok) {
+          this.lastSync = cloudAt;
+          this.setPhase('synced');
+          toast('☁️ 클라우드에서 작업을 불러왔어요');
+          this.uploadMissing();
+          return;
+        }
+      }
+      this.uploadMissing();
+      await this.pushNow(true);
+    } catch (e) {
+      this.fail(e);
+    }
+  },
+
+  /* ---------------- 프로젝트 행 ---------------- */
+  async fetchRow() {
+    const { data, error } = await this.sb.from(CLOUD.table)
+      .select('id,title,data,updated_at').eq('id', this.rowId).maybeSingle();
+    if (error) throw error;
+    return data || null;
+  },
+
+  mediaMeta() {
+    const ids = usedMediaIds();
+    const out = [];
+    for (const m of media.values()) {
+      if (!ids.has(m.id) || !this.uploaded.has(m.id)) continue;
+      out.push({ id: m.id, name: m.name, kind: m.kind, type: m.type || '', w: m.w || 0, h: m.h || 0, duration: m.duration || 0 });
+    }
+    return out;
+  },
+
+  async pushNow(quiet) {
+    if (!this.sb || !this.user || this.suppress) return false;
+    if (!(P.clips.length || P.texts.length || P.stickers.length || P.blurs.length || (P.pips || []).length || P.bgm.length)) {
+      this.setPhase('synced');
+      return false;
+    }
+    this.setPhase('working');
+    try {
+      await this.flushUploads();
+      const at = new Date();
+      const row = {
+        id: this.rowId, user_id: this.user.id, title: P.name || '도레 릴스',
+        data: { app: 'dore-reels-studio', v: 2, project: P, media: this.mediaMeta(), savedAt: at.toISOString() },
+        updated_at: at.toISOString()
+      };
+      const { error } = await this.sb.from(CLOUD.table).upsert(row, { onConflict: 'id' });
+      if (error) { this.fail(error); return false; }
+      this.lastSync = Date.now();
+      this.setPhase('synced');
+      return true;
+    } catch (e) {
+      this.fail(e);
+      return false;
+    }
+  },
+
+  schedulePush(ms) {
+    if (!this.sb || !this.user || this.suppress) return;
+    clearTimeout(this.pushTimer);
+    this.pushTimer = setTimeout(() => { this.pushNow(); }, ms == null ? CLOUD.debounce : ms);
+  },
+  touch() { this.schedulePush(); },
+
+  /* ---------------- 클라우드 → 이 기기 ---------------- */
+  async restore(row) {
+    const d = (row && row.data) || {};
+    const proj = d.project;
+    if (!proj) return false;
+    const metas = Array.isArray(d.media) ? d.media : [];
+    this.suppress = true;
+    try {
+      showBusy('☁️ 클라우드에서 불러오는 중…');
+      media.forEach(m => { try { if (m.url) URL.revokeObjectURL(m.url); } catch (e) { } });
+      media.clear();
+      $('videoHost').innerHTML = '';
+      P = normalizeProject(proj);
+      let got = 0;
+      for (const meta of metas) {
+        if (!meta || !meta.id || media.has(meta.id)) continue;
+        try {
+          const { data: blob, error } = await this.sb.storage.from(CLOUD.bucket).
+            download(this.user.id + '/' + meta.id);
+          if (error || !blob) continue;
+          const m = createMedia(blob, meta.name, meta.kind, meta.type || blob.type, meta.id);
+          m.w = meta.w || 0; m.h = meta.h || 0; m.duration = meta.duration || 0;
+          await mediaReady(m).catch(() => { });
+          await Draft.saveMedia(m);
+          this.uploaded.add(meta.id);
+          got++;
+        } catch (e) { }
+      }
+      this.writeUploaded();
+      history.past.length = 0; history.future.length = 0; history.pending = null;
+      state.sel = null; state.t = 0;
+      try { Face.reset(); } catch (e) { }
+      renderAll();
+      try { await Draft.save(); } catch (e) { }   // 복원한 작업을 이 기기에도 저장
+      setSaveState('saved', Date.parse(row.updated_at) || Date.now());
+      hideBusy();
+      if (metas.length && got < metas.length) toast('☁️ 미디어 ' + got + '/' + metas.length + '개만 받았어요');
+      return true;
+    } catch (e) {
+      hideBusy();
+      return false;
+    } finally {
+      this.suppress = false;
+    }
+  },
+
+  /* ---------------- 이 기기 → 클라우드 (미디어) ---------------- */
+  onMediaSaved(m) {
+    if (!this.sb || !this.user || !m || !m.blob) return;
+    if (this.uploaded.has(m.id) || this.pending.has(m.id)) return;
+    if (m.blob.size > CLOUD.maxFile) {
+      this.warn('size', '☁️ 50MB가 넘는 파일은 클라우드에 올리지 못해요 · 이 기기에는 저장했어요');
+      return;
+    }
+    this.pending.add(m.id);
+    this.setPhase('uploading');
+    this.pump();
+  },
+
+  uploadMissing() {
+    if (!this.sb || !this.user) return;
+    const ids = usedMediaIds();
+    let n = 0;
+    for (const m of media.values()) {
+      if (!ids.has(m.id) || this.uploaded.has(m.id) || this.pending.has(m.id)) continue;
+      if (!m.blob) continue;
+      if (m.blob.size > CLOUD.maxFile) { this.warn('size', '☁️ 50MB가 넘는 파일은 클라우드에 올리지 못해요 · 이 기기에는 저장했어요'); continue; }
+      this.pending.add(m.id); n++;
+    }
+    if (n) { this.setPhase('uploading'); this.pump(); }
+  },
+
+  async pump() {
+    if (this.busy || !this.sb || !this.user) return;
+    this.busy = true;
+    try {
+      while (this.pending.size && this.sb && this.user) {
+        const id = this.pending.values().next().value;
+        this.pending.delete(id);
+        const m = media.get(id);
+        if (!m || !m.blob) continue;
+        const path = this.user.id + '/' + id;
+        try {
+          const { error } = await this.sb.storage.from(CLOUD.bucket).
+            upload(path, m.blob, { contentType: m.type || m.blob.type || 'application/octet-stream', upsert: true });
+          if (error) this.uploadFailed(error);
+          else { this.uploaded.add(id); this.writeUploaded(); this.paint(); }
+        } catch (e) { this.uploadFailed(e); }
+      }
+    } finally {
+      this.busy = false;
+      if (!this.pending.size) {
+        if (this.user) this.schedulePush(900);
+        if (this.phase === 'uploading') this.setPhase(this.lastSync ? 'synced' : (this.user ? 'working' : 'signedout'));
+      }
+    }
+  },
+
+  async flushUploads(limitMs) {
+    const t0 = Date.now();
+    while ((this.busy || this.pending.size) && Date.now() - t0 < (limitMs || 45000)) await sleep(150);
+  },
+
+  uploadFailed(err) {
+    const msg = String((err && (err.message || err.error)) || err || '');
+    if (/maximum allowed size|too large|Payload too large|413|Object too large/i.test(msg))
+      this.warn('size', '☁️ 파일이 커서 올리지 못했어요 (한 파일 50MB까지) · 이 기기에는 저장했어요');
+    else if (/quota|exceeded|storage limit|insufficient/i.test(msg))
+      this.warn('quota', '☁️ 클라우드 저장 공간(무료 1GB)이 가득 찼어요 · 이 기기에는 저장했어요');
+    else if (/JWT|row-level security|policy/i.test(msg))
+      this.warn('rls', '☁️ 클라우드 권한이 만료됐어요 · ☁️ 클라우드 버튼에서 다시 로그인해 주세요');
+    else
+      this.warn('up:' + msg.slice(0, 40), '☁️ 미디어 업로드 실패: ' + (msg || '알 수 없는 오류'));
+  },
+
+  warn(key, msg) {
+    if (this.warned.has(key)) return;
+    this.warned.add(key);
+    toast(msg, 4200);
+    setTimeout(() => this.warned.delete(key), 30000);
+  },
+
+  fail(e) {
+    this.setPhase('error');
+    const msg = String((e && (e.message || e.error_description || e.error)) || e || '');
+    if (/Failed to fetch|NetworkError|network/i.test(msg)) toast('☁️ 오프라인이에요 · 이 기기에는 계속 저장돼요', 3200);
+    else this.warn('fail:' + msg.slice(0, 40), '☁️ 클라우드 동기화 오류: ' + (msg || '알 수 없는 오류'));
+  },
+
+  /* ---------------- 로그인 / 회원가입 ---------------- */
+  bindUI() {
+    const on = (id, ev, fn) => { const el = $(id); if (el) el.addEventListener(ev, fn); };
+    on('btnCloud', 'click', () => this.openModal());
+    on('cloudSubmit', 'click', () => this.submit());
+    on('cloudSwitch', 'click', () => this.setMode(this.mode === 'signup' ? 'login' : 'signup'));
+    on('cloudPwEye', 'click', () => this.togglePw());
+    on('cloudSyncNow', 'click', async () => {
+      const ok = await this.pushNow();
+      toast(ok ? '☁️ 클라우드에 저장했어요' : '☁️ 저장하지 못했어요 · 잠시 후 다시 시도해 주세요');
+      this.paint();
+    });
+    on('cloudLogout', 'click', () => this.logout());
+    ['cloudEmail', 'cloudPw'].forEach(id => on(id, 'keydown', (e) => { if (e.key === 'Enter') this.submit(); }));
+  },
+
+  openModal() {
+    const m = $('cloudModal');
+    if (!m) return;
+    if (!this.user) this.setMode(this.mode, true);
+    this.paint();
+    m.classList.add('show');
+  },
+
+  setMode(mode, quiet) {
+    this.mode = mode === 'signup' ? 'signup' : 'login';
+    const signup = this.mode === 'signup';
+    if ($('cloudTitle')) $('cloudTitle').textContent = signup ? '☁️ 클라우드 회원가입' : '☁️ 클라우드 연결';
+    if ($('cloudSubmit')) $('cloudSubmit').textContent = signup ? '회원가입' : '로그인';
+    if ($('cloudSwitch')) $('cloudSwitch').textContent = signup ? '이미 계정이 있어요 · 로그인' : '처음이에요 · 회원가입';
+    if ($('cloudPw')) $('cloudPw').setAttribute('autocomplete', signup ? 'new-password' : 'current-password');
+    if (!quiet && $('cloudMsg')) $('cloudMsg').textContent = '';
+  },
+
+  togglePw() {
+    const pw = $('cloudPw');
+    if (!pw) return;
+    pw.type = pw.type === 'password' ? 'text' : 'password';
+    if ($('cloudPwEye')) $('cloudPwEye').textContent = pw.type === 'password' ? '👁' : '🙈';
+  },
+
+  msg(t) { if ($('cloudMsg')) $('cloudMsg').textContent = t || ''; },
+
+  async submit() {
+    const email = (($('cloudEmail') && $('cloudEmail').value) || '').trim();
+    const pw = ($('cloudPw') && $('cloudPw').value) || '';
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { this.msg('이메일 주소를 확인해 주세요'); return; }
+    if (pw.length < 6) { this.msg('비밀번호는 6자 이상이에요'); return; }
+    if (!this.sb) { this.msg('아직 연결 중이에요 · 잠시 후 다시 눌러 주세요'); return; }
+    this.msg('');
+    const btn = $('cloudSubmit');
+    const signup = this.mode === 'signup';
+    if (btn) { btn.disabled = true; btn.textContent = signup ? '가입 중…' : '로그인 중…'; }
+    try {
+      if (signup) {
+        const { data, error } = await this.sb.auth.signUp({ email, password: pw });
+        if (error) throw error;
+        const sess = data && data.session;
+        if (!sess) { this.msg('이미 가입된 이메일이에요 · 로그인해 주세요'); this.setMode('login', true); return; }
+        await this.applyUser(sess.user, true);
+        if ($('cloudModal')) $('cloudModal').classList.remove('show');
+        toast('☁️ 클라우드 계정을 만들었어요 · 자동 동기화 시작');
+      } else {
+        const { data, error } = await this.sb.auth.signInWithPassword({ email, password: pw });
+        if (error) throw error;
+        const user = (data && data.user) || (data && data.session && data.session.user);
+        await this.applyUser(user, false);
+        if ($('cloudModal')) $('cloudModal').classList.remove('show');
+        toast('☁️ 클라우드에 연결됐어요');
+      }
+      if ($('cloudPw')) $('cloudPw').value = '';
+    } catch (e) {
+      this.msg(this.errText(e));
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = this.mode === 'signup' ? '회원가입' : '로그인'; }
+      this.paint();
+    }
+  },
+
+  errText(e) {
+    const m = String((e && (e.message || e.error_description || e.error)) || e || '');
+    if (/Invalid login credentials/i.test(m)) return '이메일이나 비밀번호가 맞지 않아요';
+    if (/already registered|already been registered/i.test(m)) return '이미 가입된 이메일이에요 · 로그인해 주세요';
+    if (/Email not confirmed/i.test(m)) return '이메일 확인이 필요해요';
+    if (/rate limit|too many|for security purposes/i.test(m)) return '요청이 너무 많아요 · 잠시 후 다시 시도해 주세요';
+    if (/Password should be/i.test(m)) return '비밀번호는 6자 이상이에요';
+    if (/Failed to fetch|NetworkError|network/i.test(m)) return '인터넷 연결을 확인해 주세요';
+    return m || '연결하지 못했어요';
+  },
+
+  async logout() {
+    try { if (this.sb) await this.sb.auth.signOut(); } catch (e) { }
+    clearTimeout(this.pushTimer);
+    this.pending.clear();
+    this.user = null; this.rowId = ''; this.lastSync = 0;
+    this.setPhase('signedout');
+    const mo = $('cloudModal'); if (mo) mo.classList.remove('show');
+    toast('☁️ 클라우드에서 로그아웃했어요 · 이 기기 저장은 그대로예요');
+  },
+
+  /* ---------------- 표시 ---------------- */
+  paint() {
+    const signed = !!this.user;
+    const ph = this.phase;
+    let txt = '☁️ 클라우드 연결', cls = 'save-mini cloud';
+    if (ph === 'working' && !signed) { txt = '☁️ 연결 중…'; cls += ' working'; }
+    else if (ph === 'uploading') { txt = '☁️ 업로드 중…'; cls += ' working'; }
+    else if (ph === 'working') { txt = '☁️ 동기화 중…'; cls += ' working'; }
+    else if (ph === 'synced') { txt = '☁️ 동기화됨 ' + hhmm(this.lastSync || (saveState && saveState.at) || Date.now()); cls += ' on'; }
+    else if (ph === 'error') { txt = '☁️ 동기화 오류'; cls += ' err'; }
+    else if (ph === 'signedout' || ph === 'off') { txt = '☁️ 클라우드 연결'; }
+    else if (signed) { txt = '☁️ 연결됨'; cls += ' on'; }
+    const b = $('btnCloud');
+    if (b) { b.textContent = txt; b.className = cls; b.title = signed ? '클라우드 동기화 · 로그아웃' : '폰·PC 자동 동기화 연결'; }
+    const hint = $('saveHint');
+    if (hint) hint.textContent = signed ? '폰·PC 자동 동기화 중' : '다른 기기는 저장 → 복원으로 옮겨요';
+    const f = $('cloudForm'), a = $('cloudAccount');
+    if (f) f.classList.toggle('hidden', signed);
+    if (a) a.classList.toggle('hidden', !signed);
+    if (signed) {
+      if ($('cloudWho')) $('cloudWho').textContent = this.user.email || '(이메일 없음)';
+      if ($('cloudStatus')) $('cloudStatus').textContent = txt.replace('☁️ ', '');
+      if ($('cloudLast')) $('cloudLast').textContent = this.lastSync ? new Date(this.lastSync).toLocaleString('ko-KR') : '아직 없음';
+    }
+  }
+};
+
+/* ============================================================
    저장 · 복원 · 내보내기
    ============================================================ */
 function stamp() {
@@ -5205,7 +5787,15 @@ async function boot() {
   if (window.ResizeObserver) {
     try { new ResizeObserver(() => { renderOnce(); renderTimeline(); syncTextOverlay(); }).observe($('stage')); } catch (e) { }
   }
-  document.addEventListener('gesturestart', (e) => e.preventDefault());
+  document.addEventListener('gesturestart', (e) => e.preventDefault(), { passive: false });
+  // iOS Safari에서 타임라인·캔버스의 두 손가락 제스처가 페이지 전체 확대로 새지 않게
+  ['gesturechange', 'gestureend'].forEach(ev =>
+    document.addEventListener(ev, (e) => e.preventDefault(), { passive: false }));
+  ['tlScroll', 'stage', 'preview'].forEach(id => {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener('touchmove', (e) => { if (e.touches && e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  });
   // iOS 키보드가 올라오면 하단 독·토스트가 가려지지 않게 (visualViewport)
   try {
     const vv = window.visualViewport;
@@ -5233,6 +5823,7 @@ async function boot() {
   ensureFont('pretendard');
   await bootDraft();
   if (!saveState.at) setSaveState('idle');
+  try { Cloud.init(); } catch (e) { }
   ensureFont('pretendard');
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => { layoutCache.clear(); renderOnce(); });
@@ -5258,7 +5849,7 @@ window.DoreStudio = {
   setTlZoom, nudge, setStageZoom, openAttachSheet, closeSheet, openTextDock, closeTextDock, renderTextDock,
   syncTextOverlay, textAnimState, selHandles, selRotPos, selScalePos, pushClipFromMedia, openClipTrim,
   movePip, duplicateSelected, chooseCutForSelected, syncPipMedia, pipSize, drawPipObject,
-  syncMedia, pipVideoEl, pipVideos
+  syncMedia, pipVideoEl, pipVideos, Cloud, CLOUD
 };
 async function addPipB64(b64, name, kind) {
   const bin = atob(b64);
