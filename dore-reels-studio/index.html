@@ -5485,6 +5485,8 @@ let muxerMod = null;
 let aacSupport = null;
 let exportResult = { blob: null, name: '', url: '' };
 let exportMeta = { method: '', frames: 0, fps: EXPORT_FPS, ms: 0, audio: false, codec: '' };
+let wcFailReason = '';   // WebCodecs 경로를 못 쓴 이유 (폴백 안내 문구용)
+function wcNull(reason) { if (reason) wcFailReason = reason; return null; }
 
 function pickMime(wantAudio) {
   if (!window.MediaRecorder) return '';
@@ -5698,7 +5700,8 @@ async function pickAvcCodec(w, h, fps) {
 /* -------- ① WebCodecs + mp4-muxer 경로 -------- */
 async function exportWebCodecs(d, opt) {
   opt = opt || {};
-  if (!window.VideoEncoder || !window.VideoFrame) return null;
+  wcFailReason = '';
+  if (!window.VideoEncoder || !window.VideoFrame) return wcNull('no-support');
   const wasExporting = state.exporting;
   state.exporting = true;   // 미리보기 sync가 프레임 시크를 되돌리지 않게
   try {
@@ -5714,11 +5717,11 @@ async function exportWebCodecsInner(d, opt) {
     Muxer = mod.Muxer; ArrayBufferTarget = mod.ArrayBufferTarget;
   } catch (e) {
     console.warn('[export] mp4-muxer 로드 실패', e);
-    return null;
+    return wcNull('muxer');
   }
-  if (!Muxer || !ArrayBufferTarget) return null;
+  if (!Muxer || !ArrayBufferTarget) return wcNull('muxer');
   const codec = await pickAvcCodec(DESIGN_W, DESIGN_H, EXPORT_FPS);
-  if (!codec) return null;
+  if (!codec) return wcNull('codec');
 
   // 오디오 — AAC로 담을 수 있을 때만 (사파리가 AAC 인코더를 지원합니다)
   let audioBuf = null;
@@ -5738,7 +5741,7 @@ async function exportWebCodecsInner(d, opt) {
     }
     if (!audioCodec) {
       // 소리를 담을 인코더가 없으면 조용한 영상보다 기존 녹화 방식이 낫습니다
-      return null;
+      return wcNull('audio');
     }
     if (!state.cancelExport) {
       updateExportUI(0, { phase: '소리를 담는 중', label: '오디오 준비' });
@@ -5751,7 +5754,7 @@ async function exportWebCodecsInner(d, opt) {
   const cv = document.createElement('canvas');
   cv.width = DESIGN_W; cv.height = DESIGN_H;
   const ctx2d = cv.getContext('2d', { alpha: false });
-  if (!ctx2d) return null;
+  if (!ctx2d) return wcNull('canvas');
   const target = new ArrayBufferTarget();
   const muxOpts = {
     target,
@@ -5773,7 +5776,7 @@ async function exportWebCodecsInner(d, opt) {
   } catch (e) {
     console.warn('[export] VideoEncoder 초기화 실패', e);
     try { if (venc) venc.close(); } catch (e2) { }
-    return null;
+    return wcNull('config');
   }
 
   const total = Math.max(1, Math.round(d * EXPORT_FPS));
@@ -5811,12 +5814,12 @@ async function exportWebCodecsInner(d, opt) {
   if (encErr || i < total) {
     console.warn('[export] 프레임 인코딩 실패', encErr);
     try { venc.close(); } catch (e) { }
-    return null;
+    return wcNull('encode');
   }
   updateExportUI(1, { label: '인코딩 마무리 중…', phase: '영상 마무리 중' });
   try { await venc.flush(); } catch (e) { encErr = e; }
   try { venc.close(); } catch (e) { }
-  if (encErr) return null;
+  if (encErr) return wcNull('encode');
 
   // 오디오 인코딩 + muxing
   if (audioBuf) {
@@ -5872,9 +5875,9 @@ async function exportWebCodecsInner(d, opt) {
     } catch (e) {
       console.warn('[export] 오디오 인코딩 실패', e);
       try { aenc && aenc.close(); } catch (e2) { }
-      return null;
+      return wcNull('audio-encode');
     }
-    if (encErr) return null;
+    if (encErr) return wcNull('audio-encode');
   }
 
   let buf = null;
@@ -5883,9 +5886,9 @@ async function exportWebCodecsInner(d, opt) {
     buf = target.buffer;
   } catch (e) {
     console.warn('[export] muxing 실패', e);
-    return null;
+    return wcNull('mux');
   }
-  if (!buf || !buf.byteLength) return null;
+  if (!buf || !buf.byteLength) return wcNull('mux');
   const blob = new Blob([buf], { type: 'video/mp4' });
   return { blob, ext: 'mp4' };
 }
@@ -5989,6 +5992,8 @@ function showExportResult(blob, ext, d) {
       ' 아이폰 사진첩에는 MP4가 더 잘 열려요.';
   } else if (wantedAudio && !exportMeta.audio) {
     note.textContent = '이 브라우저에서는 소리를 담지 못했어요. 사파리 최신 버전에서 다시 저장하면 BGM·효과음까지 함께 담겨요.';
+  } else if (exportMeta.method === 'mediarecorder' && wcFailReason && wcFailReason !== 'audio' && wcFailReason !== 'audio-encode') {
+    note.textContent = '이 브라우저에서는 프레임 단위 저장(WebCodecs)을 쓸 수 없어 예전 방식으로 저장했어요. 끊길 수 있으니 아이폰은 iOS 16.4 이상 사파리로 열어 주세요.';
   } else if (exportMeta.method === 'webcodecs') {
     note.textContent = '프레임마다 다시 그려 담았어요(끊김 없음). 아이폰은 [공유]를 누른 뒤 "비디오 저장"을 선택하면 사진첩에 저장돼요.';
   } else {
@@ -6342,7 +6347,7 @@ window.DoreStudio = {
   syncTextOverlay, textAnimState, selHandles, selRotPos, selScalePos, pushClipFromMedia, openClipTrim,
   movePip, duplicateSelected, chooseCutForSelected, syncPipMedia, pipSize, drawPipObject,
   syncMedia, pipVideoEl, pipVideos, Cloud, CLOUD,
-  exportMeta: () => exportMeta, exportWebCodecs, exportMediaRecorder, mixOfflineAudio,
+  exportMeta: () => exportMeta, exportWebCodecs, exportMediaRecorder, mixOfflineAudio, wcFailReason: () => wcFailReason,
   prepFrame, seekTo, aacSupported, pickAvcCodec, hasExportAudio, EXPORT_FPS
 };
 async function addPipB64(b64, name, kind) {
