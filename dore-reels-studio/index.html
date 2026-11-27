@@ -4944,7 +4944,8 @@ const Cloud = {
         if (ev === 'SIGNED_OUT') { this.user = null; this.rowId = ''; this.setPhase('signedout'); }
       });
     } catch (e) {
-      this.setPhase('error');
+      // 오프라인·CDN 차단이면 로컬 저장만으로 계속 쓰고, 버튼을 누를 때 다시 시도
+      this.phase = 'off'; this.paint();
     }
   },
 
@@ -5170,6 +5171,8 @@ const Cloud = {
 
   /* ---------------- 로그인 / 회원가입 ---------------- */
   bindUI() {
+    if (this.uiBound) return;
+    this.uiBound = true;
     const on = (id, ev, fn) => { const el = $(id); if (el) el.addEventListener(ev, fn); };
     on('btnCloud', 'click', () => this.openModal());
     on('cloudSubmit', 'click', () => this.submit());
@@ -5187,6 +5190,11 @@ const Cloud = {
   openModal() {
     const m = $('cloudModal');
     if (!m) return;
+    if (!this.sb && !this.retrying) {   // 라이브러리를 못 불러왔으면 한 번 더 시도
+      this.retrying = true;
+      this.booted = false;
+      this.init().then(() => { this.retrying = false; this.paint(); });
+    }
     if (!this.user) this.setMode(this.mode, true);
     this.paint();
     m.classList.add('show');
