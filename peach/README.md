@@ -46,3 +46,13 @@
 ## 원본 소스
 편집용 원본은 `/workspace/work/peach/index.src.html` (폰트는 `fonts/` 파일 참조)이고,
 `python3 /workspace/work/peach-build/build.py` 로 폰트를 내장해 `index.html` 을 다시 만듭니다.
+
+### 문구를 고쳤을 때 (중요)
+내장 폰트는 페이지에 나오는 글자만 담은 **서브셋**입니다. 문구를 추가·수정하면 새 글자의 글리프가 없어
+아이폰 사파리에서 그 글자만 시스템 고딕으로 떨어집니다(글씨체가 들쭉날쭉해 보이는 원인).
+그래서 `index.src.html` 을 고친 뒤에는 **반드시 이 순서로** 다시 빌드하세요.
+
+```
+python3 /workspace/work/peach-build/build_fonts.py   # 새 문구 기준으로 7개 폰트 서브셋 재생성 (누락 0건 검사)
+python3 /workspace/work/peach-build/build.py         # 서브셋을 base64로 index.html 에 내장
+```
