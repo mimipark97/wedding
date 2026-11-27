@@ -5722,6 +5722,8 @@ async function exportWebCodecsInner(d, opt) {
   if (!Muxer || !ArrayBufferTarget) return wcNull('muxer');
   const codec = await pickAvcCodec(DESIGN_W, DESIGN_H, EXPORT_FPS);
   if (!codec) return wcNull('codec');
+  // 긴 영상은 메모리·용량을 아끼려고 조금 낮춰 담습니다
+  const vBitrate = d > 45 ? 6000000 : 8000000;
 
   // 오디오 — AAC로 담을 수 있을 때만 (사파리가 AAC 인코더를 지원합니다)
   let audioBuf = null;
@@ -5772,7 +5774,7 @@ async function exportWebCodecsInner(d, opt) {
       output: (chunk, meta) => { try { muxer.addVideoChunk(chunk, meta); } catch (e) { encErr = e; } },
       error: (e) => { encErr = e; }
     });
-    venc.configure({ codec, width: DESIGN_W, height: DESIGN_H, bitrate: 8000000, framerate: EXPORT_FPS, latencyMode: 'quality' });
+    venc.configure({ codec, width: DESIGN_W, height: DESIGN_H, bitrate: vBitrate, framerate: EXPORT_FPS, latencyMode: 'quality' });
   } catch (e) {
     console.warn('[export] VideoEncoder 초기화 실패', e);
     try { if (venc) venc.close(); } catch (e2) { }
