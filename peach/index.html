@@ -119,9 +119,10 @@ button{font-family:inherit;color:inherit;background:none;border:0;padding:0;curs
 }
 .letters{position:absolute;inset:0;z-index:2;pointer-events:none}
 .letters span{
-  position:absolute;width:25px;height:25px;border-radius:50%;
+  --d:clamp(19px,5.5vw,23px);
+  position:absolute;width:var(--d);height:var(--d);border-radius:50%;
   background:var(--pink);color:#fff;
-  font-family:var(--serif);font-weight:600;font-size:13px;line-height:25px;
+  font-family:var(--serif);font-weight:600;font-size:calc(var(--d) * .52);line-height:var(--d);
   text-align:center;letter-spacing:0;
   box-shadow:0 2px 5px rgba(90,0,25,.35), inset 0 -1px 0 rgba(0,0,0,.18);
   transform:translate(-50%,-50%) rotate(var(--r,0deg));
@@ -500,18 +501,18 @@ button{font-family:inherit;color:inherit;background:none;border:0;padding:0;curs
   <header class="hero" id="top">
     <div class="hero-photo">
     <div class="letters" aria-hidden="true">
-        <span style="left:14.5%;top:31%;--r:-7deg">M</span>
-        <span style="left:20%;top:23%;--r:4deg">I</span>
-        <span style="left:26.5%;top:19%;--r:-3deg">M</span>
-        <span style="left:33%;top:21.5%;--r:6deg">I</span>
-        <span style="left:39.5%;top:27%;--r:-6deg">J</span>
-        <span style="left:45%;top:20.5%;--r:5deg">U</span>
-        <span style="left:50.5%;top:17%;--r:-4deg">N</span>
-        <span style="left:56.5%;top:16.5%;--r:6deg">H</span>
-        <span style="left:62.5%;top:18.5%;--r:-5deg">Y</span>
-        <span style="left:68.5%;top:22%;--r:3deg">E</span>
-        <span style="left:74.5%;top:26.5%;--r:-6deg">O</span>
-        <span style="left:80.5%;top:32%;--r:5deg">K</span>
+        <span style="left:13.85%;top:21.92%;--r:-6deg">M</span>
+        <span style="left:20.01%;top:18.12%;--r:4deg">I</span>
+        <span style="left:29.15%;top:17.92%;--r:-4deg">M</span>
+        <span style="left:35.38%;top:21.62%;--r:5deg">I</span>
+        <span style="left:46.15%;top:18.96%;--r:-5deg">J</span>
+        <span style="left:51.65%;top:15.93%;--r:4deg">U</span>
+        <span style="left:59.30%;top:15.27%;--r:-3deg">N</span>
+        <span style="left:66.86%;top:16.30%;--r:4deg">H</span>
+        <span style="left:73.59%;top:18.55%;--r:-4deg">Y</span>
+        <span style="left:79.16%;top:21.70%;--r:3deg">E</span>
+        <span style="left:83.42%;top:25.47%;--r:-5deg">O</span>
+        <span style="left:86.41%;top:29.62%;--r:4deg">K</span>
     </div>
 
     <!-- torn paper heart badge -->
