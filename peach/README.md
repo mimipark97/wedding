@@ -33,8 +33,8 @@
 - `hero.jpg` = 원본 1749×2624 → 1600px 폭, JPEG q92
 - `gallery-*.jpg` = 원본 2000~3000px → 폭 1200px(가로 사진은 1800px), JPEG q92
 - 원본이 853px 폭인 사진 2장(`gallery-15`, `gallery-17`)은 원본 자체가 그 해상도입니다.
-- 다시 받으려면 `/workspace/work/peach-build/rebuild_photos.py` (원본은 `/workspace/work/peach-hires/orig/`),
-  하트 로켓 크롭은 `make_lockets.py`.
+- 다시 받으려면 `/workspace/work/peach-build/rebuild_photos.py` (원본은 `/workspace/work/peach-hires/orig/`).
+- 하트 로켓 클로즈업 2장(`locket-bride.jpg`, `locket-groom.jpg`)은 2026-11-28에 `attachments/2026-11-28/IMG_1996`에서 얼굴 중심 700×700 흑백으로 다시 잘랐습니다 — 크롭 좌표는 `/workspace/work/peach-build/crop_locket_1996.py`, 예전 크롭 스크립트는 `make_lockets.py`.
 
 ### 아기 사진 바꾸기
 `downloads/baby-demo/` 의 원본을 흰 배경 제거 + 외곽선 스티커로 만든 파일입니다.
